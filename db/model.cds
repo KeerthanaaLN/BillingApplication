@@ -11,7 +11,6 @@ entity Dealers {
                                 on allocations.dealers = $self;
 }
 
-
 // MODEL
 entity Models {
     key modelCode          : String;
@@ -21,7 +20,7 @@ entity Models {
         availableStock     : Integer;
         orderQty           : Integer;
         fundRequired       : Decimal;
-        allocationQty      : Integer;
+        allocationQty      : Integer default 0;
         perBikeValue       : Decimal;
         orderValue         : Decimal;
         fst                : Integer;
