@@ -1,1 +1,1 @@
-using billingApp.srv.BillingServcie as service from '../../srv/service';
+using billingApp.srv.BillingService as service from '../../srv/service';

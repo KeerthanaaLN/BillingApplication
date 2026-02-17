@@ -24,7 +24,7 @@
                                 <Select 
                                     id="dealerSelect"
                                     width="100%"
-                                    items="{/Dealers}"
+                                    items="{/Dealer}"
                                     change="onDealerSelect">
                                     <core:Item key="{dealerID}"
                                                text="{dealerID} - {dealerName}"/>
