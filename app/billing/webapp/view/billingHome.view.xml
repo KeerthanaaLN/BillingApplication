@@ -78,8 +78,9 @@
                             <Button 
                                 text="Go" 
                                 type="Emphasized"
-                                press="onDealerGo"
-                                width="90px"/>
+                                press="onDealerGo"                    
+                                width="150px"
+                                />
                         </VBox>
 
                         </HBox>
