@@ -1,7 +1,8 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], (Controller, JSONModel) => {
+    "sap/ui/model/json/JSONModel",
+    "sap/m/MessageBox"
+], (Controller, JSONModel, MessageBox) => {
     "use strict";
 
     return Controller.extend("billing.controller.billingHome", {
@@ -74,6 +75,9 @@ sap.ui.define([
                 oViewModel.setProperty("/fundAvailability", oFullDealer.fundAvailability);
                 oViewModel.setProperty("/limitAvailability", oFullDealer.limitAvailability);
                 oViewModel.setProperty("/infOtherAmount", oFullDealer.infOtherAmount);
+                oViewModel.setProperty("/infType", oFullDealer.infType);
+
+
 
                 oViewModel.setProperty("/dealerSelected", true); // enable GO
             });
@@ -100,7 +104,55 @@ sap.ui.define([
 
 
         onDealerGo() {
-            // Your Go button logic here
+
+            const oViewModel = this.getView().getModel("view");
+            const oWizard = this.byId("BillingWizard");
+            const oDealerStep = this.byId("DealerStep");
+
+            const sDealerType = oViewModel.getProperty("/infType");   // INF / NON-INF
+            const fFund = parseFloat(oViewModel.getProperty("/fundAvailability")) || 0;
+            const fLimit = parseFloat(oViewModel.getProperty("/limitAvailability")) || 0;
+
+            const MIN_FUND = 200000; // 2 Lakhs
+
+            // Basic validation - Dealer selected or not
+            if (!sDealerType) {
+                MessageBox.error("Please select a dealer before proceeding.");
+                return;
+            }
+
+            // Condition 1: INF Dealer
+            if (sDealerType === "INF") {
+
+                if (fLimit !== 0) {
+                    MessageBox.error("INF dealer must have Limit Available = 0.");
+                    return;
+                }
+
+                if (fFund <= MIN_FUND) {
+                    MessageBox.error("INF dealer Fund Availability must be above 2 Lakhs.");
+                    return;
+                }
+            }
+
+            // Condition 2: NON-INF Dealer
+            if (sDealerType === "NON-INF") {
+
+                if (fLimit === 0) {
+                    MessageBox.error("NON-INF dealer must have Limit Available greater than 0.");
+                    return;
+                }
+
+                if (fFund <= MIN_FUND) {
+                    MessageBox.error("NON-INF dealer Fund Availability must be above 2 Lakhs.");
+                    return;
+                }
+            }
+
+            // ✅ If all validations pass
+            oDealerStep.setValidated(true);
+            oWizard.nextStep();
+
         },
 
         onAllocationChange(oEvent) {

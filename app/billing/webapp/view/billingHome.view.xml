@@ -51,9 +51,7 @@
                                     <suggestionRows>
                                         <ColumnListItem>
                                             <cells>
-                                                <Text
-                                                    text="{dealerID} - {dealerName}"
-                                                />
+                                                <Text text="{dealerID} - {dealerName}" />
                                             </cells>
                                         </ColumnListItem>
                                     </suggestionRows>
@@ -104,7 +102,7 @@
                                 />
                             </VBox>
                             <VBox class="sapUiSmallMarginTop">
-                                <Button
+                                 <Button
                                     text="Go"
                                     type="Emphasized"
                                     press="onDealerGo"
@@ -155,6 +153,22 @@
                                     minScreenWidth="Tablet"
                                     hAlign="Right"
                                 >
+                                    <Text text="Depot Stock" />
+                                </Column>
+                                <Column
+                                    width="12%"
+                                    demandPopin="true"
+                                    minScreenWidth="Tablet"
+                                    hAlign="Right"
+                                >
+                                    <Text text="Allocated Qty" />
+                                </Column>
+                                <Column
+                                    width="12%"
+                                    demandPopin="true"
+                                    minScreenWidth="Tablet"
+                                    hAlign="Right"
+                                >
                                     <Text text="Available Stock" />
                                 </Column>
                                 <Column
@@ -163,7 +177,7 @@
                                     minScreenWidth="Tablet"
                                     hAlign="Right"
                                 >
-                                    <Text text="Order Qty" />
+                                    <Text text="Fund Required" />
                                 </Column>
                                 <Column
                                     width="15%"
@@ -181,6 +195,14 @@
                                 >
                                     <Text text="Per Bike Value" />
                                 </Column>
+                                <Column
+                                    width="12%"
+                                    demandPopin="true"
+                                    minScreenWidth="Tablet"
+                                    hAlign="Right"
+                                >
+                                    <Text text="Order Value" />
+                                </Column>
                             </columns>
 
                             <items>
@@ -189,11 +211,19 @@
                                         <Text text="{modelCode}" />
                                         <Text text="{modelDesc}" />
                                         <Text
+                                            text="{depotStock}"
+                                            textAlign="Right"
+                                        />
+                                        <Text
+                                            text="{allocatedQty}"
+                                            textAlign="Right"
+                                        />
+                                        <Text
                                             text="{availableStock}"
                                             textAlign="Right"
                                         />
                                         <Text
-                                            text="{orderQty}"
+                                            text="{fundRequired}"
                                             textAlign="Right"
                                         />
                                         <Input
@@ -205,6 +235,10 @@
                                         />
                                         <Text
                                             text="{perBikeValue}"
+                                            textAlign="Right"
+                                        />
+                                        <Text
+                                            text="{orderValue}"
                                             textAlign="Right"
                                         />
                                     </cells>
