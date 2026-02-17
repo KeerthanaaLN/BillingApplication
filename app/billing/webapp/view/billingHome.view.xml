@@ -33,46 +33,24 @@
 
                             <VBox width="15%">
                                 <Label text="Dealer Name :" class="sapUiSmallMarginBottom"/>
-                                <Input 
-                                    value="{dealerName}" 
-                                    editable="false"
-                                    width="100%"/>
+                                <Input value="{/dealerName}" editable="false" width="100%"/>
                             </VBox>
 
                             <VBox width="15%">
                                 <Label text="Fund Availability :" class="sapUiSmallMarginBottom"/>
-                                <Input 
-                                    value="{
-                                        path: 'fundAvailability',
-                                        type: 'sap.ui.model.type.Currency'
-                                    }" 
-                                    editable="false"
-                                    width="100%"
-                                    textAlign="Right"/>
+                                <Input value="{/fundAvailability}" editable="false" width="100%" textAlign="Right"/>
                             </VBox>
 
                             <VBox width="15%">
                                 <Label text="Limit Available (in INF) :" class="sapUiSmallMarginBottom"/>
                                 <Input 
-                                    value="{
-                                        path: 'limitAvailability',
-                                        type: 'sap.ui.model.type.Currency'
-                                    }" 
-                                    editable="false"
-                                    width="100%"
-                                    textAlign="Right"/>
+                                    value="{/limitAvailability}" editable="false" width="100%" textAlign="Right"/>
                             </VBox>
 
                             <VBox width="15%">
                                 <Label text="INF Other ( X ) Account" class="sapUiSmallMarginBottom"/>
                                 <Input 
-                                    value="{
-                                        path: 'infOtherAmount',
-                                        type: 'sap.ui.model.type.Currency'
-                                    }" 
-                                    editable="false"
-                                    width="100%"
-                                    textAlign="Right"/>
+                                    value="{/infOtherAmount}" editable="false" width="100%" textAlign="Right"/>
                             </VBox>
                             <VBox class="sapUiSmallMarginTop">
                             <Button 
