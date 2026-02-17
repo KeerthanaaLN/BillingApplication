@@ -32,18 +32,14 @@
                                 <Input
                                     id="dealerInput"
                                     width="100%"
-                                    maxSuggestionWidth="300px"
-                                    placeholder="Enter Dealer ID or Name"
+                                    placeholder="Enter Dealer ID"
                                     showSuggestion="true"
                                     filterSuggests="false"
                                     startSuggestion="1"
                                     suggest="onDealerSuggest"
                                     suggestionItemSelected="onDealerSelect"
                                     liveChange="onDealerLiveChange"
-                                    suggestionRows="{
-                                        path: '/Dealer'
-                                    }"
-                                >
+                                    suggestionRows="{ path: '/Dealer',parameters: {$select: 'dealerID,dealerName'}}">
                                     <!-- Column headers -->
                                     <suggestionColumns>
                                         <Column width="250px">
@@ -55,7 +51,9 @@
                                     <suggestionRows>
                                         <ColumnListItem>
                                             <cells>
-                                                <Text text="{dealerID} - {dealerName}" />
+                                                <Text
+                                                    text="{dealerID} - {dealerName}"
+                                                />
                                             </cells>
                                         </ColumnListItem>
                                     </suggestionRows>
@@ -110,6 +108,7 @@
                                     text="Go"
                                     type="Emphasized"
                                     press="onDealerGo"
+                                    enabled="{view>/dealerSelected}"
                                     width="150px"
                                 />
                             </VBox>

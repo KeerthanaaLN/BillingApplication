@@ -8,44 +8,49 @@ sap.ui.define([
 
         onInit() {
 
-            // UI State Model (only for selected dealer details)
             const oViewModel = new JSONModel({
                 dealerName: "",
                 fundAvailability: "",
                 limitAvailability: "",
                 infOtherAmount: "",
-                Model: []
+                Model: [],
+                dealerSelected: false   // ⭐ important
             });
 
             this.getView().setModel(oViewModel, "view");
         }
+
         ,
 
         onDealerSuggest(oEvent) {
 
-            const sValue = oEvent.getParameter("suggestValue");
+            const sValue = oEvent.getParameter("suggestValue")?.trim();
             const oInput = oEvent.getSource();
-            const oBinding = oInput.getBinding("suggestionItems");
+            const oBinding = oInput.getBinding("suggestionRows");
 
             if (!oBinding) return;
 
+            // nothing typed → show nothing
             if (!sValue) {
                 oBinding.filter([]);
+                oBinding.refresh();
                 return;
             }
 
             const Filter = sap.ui.model.Filter;
             const FilterOperator = sap.ui.model.FilterOperator;
 
+            // STRICT match (starts with or contains based on your choice)
             const oFilter = new Filter({
                 filters: [
-                    new Filter("dealerID", FilterOperator.Contains, sValue),
+                    new Filter("dealerID", FilterOperator.StartsWith, sValue),
                     new Filter("dealerName", FilterOperator.Contains, sValue)
                 ],
                 and: false
             });
 
             oBinding.filter([oFilter]);
+            oBinding.refresh(); // ⭐ force backend request
         },
         onDealerSelect(oEvent) {
 
@@ -58,6 +63,7 @@ sap.ui.define([
 
             const oModel = this.getView().getModel(); // OData V4 model
             const oViewModel = this.getView().getModel("view");
+            oViewModel.setProperty("/dealerSelected", true);
 
             // Bind selected dealer context (READ full entity)
             const sPath = `/Dealer('${sDealerID}')`;
@@ -69,9 +75,29 @@ sap.ui.define([
                 oViewModel.setProperty("/limitAvailability", oFullDealer.limitAvailability);
                 oViewModel.setProperty("/infOtherAmount", oFullDealer.infOtherAmount);
 
+                oViewModel.setProperty("/dealerSelected", true); // enable GO
             });
+
         },
-       
+        onDealerLiveChange(oEvent) {
+
+            const sValue = oEvent.getParameter("value");
+            const oViewModel = this.getView().getModel("view");
+
+            if (!sValue || sValue.trim() === "") {
+
+                oViewModel.setProperty("/dealerName", "");
+                oViewModel.setProperty("/fundAvailability", "");
+                oViewModel.setProperty("/limitAvailability", "");
+                oViewModel.setProperty("/infOtherAmount", "");
+                oViewModel.setProperty("/dealerSelected", false); // disable GO
+            }
+            else {
+                // user typing → not a confirmed selection
+                oViewModel.setProperty("/dealerSelected", false);
+            }
+        },
+
 
         onDealerGo() {
             // Your Go button logic here
