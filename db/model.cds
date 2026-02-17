@@ -11,7 +11,7 @@ entity Dealers : cuid, managed {
 
     fundAvailability : Decimal(15,2);
     limitAvailability: Decimal(15,2);
-    infoOtherAmount  : Decimal(15,2);
+    infOtherAmount  : Decimal(15,2);
 
     allocations      : Association to many Allocations
                         on allocations.dealer = $self;
@@ -28,8 +28,6 @@ entity Models : cuid, managed {
     allocatedQty  : Integer default 0;
 
     availableStock : Integer default 0;
-
-
 
     perBikeValue  : Decimal(15,2);
 
