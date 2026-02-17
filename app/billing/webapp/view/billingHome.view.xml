@@ -24,7 +24,7 @@
                             alignItems="End"
                             justifyContent="SpaceBetween"
                         >
-                            <VBox width="15%">
+                            <VBox width="250px">
                                 <Label
                                     text="Select Dealer ID :"
                                     class="sapUiSmallMarginBottom"
@@ -32,6 +32,7 @@
                                 <Input
                                     id="dealerInput"
                                     width="100%"
+                                    maxSuggestionWidth="300px"
                                     placeholder="Enter Dealer ID or Name"
                                     showSuggestion="true"
                                     filterSuggests="false"
@@ -40,16 +41,13 @@
                                     suggestionItemSelected="onDealerSelect"
                                     liveChange="onDealerLiveChange"
                                     suggestionRows="{
-        path: '/Dealer'
-    }"
+                                        path: '/Dealer'
+                                    }"
                                 >
                                     <!-- Column headers -->
                                     <suggestionColumns>
-                                        <Column>
+                                        <Column width="250px">
                                             <Label text="Dealer ID" />
-                                        </Column>
-                                        <Column>
-                                            <Label text="Dealer Name" />
                                         </Column>
                                     </suggestionColumns>
 
@@ -57,8 +55,7 @@
                                     <suggestionRows>
                                         <ColumnListItem>
                                             <cells>
-                                                <Text text="{dealerID}" />
-                                                <Text text="{dealerName}" />
+                                                <Text text="{dealerID} - {dealerName}" />
                                             </cells>
                                         </ColumnListItem>
                                     </suggestionRows>
