@@ -1,0 +1,91 @@
+<mvc:View
+    controllerName="billing.controller.billingHome"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <Page id="page" title="Billing Allocation">
+
+        <content>
+
+            <Wizard id="BillingWizard" showNextButton="false">
+
+                <!-- step 1 -->
+                <WizardStep
+                    id="DealerStep"
+                    title="Dealer Information"
+                    validated="false">
+
+                    <HBox class="sapUiSmallMargin" width="50%">
+
+                        <Label text="Select Dealer ID"/>
+                        <Select id="dealerSelect"
+                                items="{/Dealers}">
+                            <core:Item key="{dealerID}"
+                                       text="{dealerID} - {dealerName}"/>
+                        </Select>
+
+                        <Label text="Dealer Name"/>
+                        <Input value="{/selectedDealer/dealerName}" editable="false"/>
+
+                        <Label text="Fund Availability"/>
+                        <Input value="{/selectedDealer/fundAvailability}" editable="false"/>
+
+                        <Label text="Limit Available (INF)"/>
+                        <Input value="{/selectedDealer/limitAvailability}" editable="false"/>
+
+                        <Label text="INF Other Account"/>
+                        <Input value="{/selectedDealer/infOtherAmount}" editable="false"/>
+
+                        <Button text="Go"
+                                type="Emphasized"
+                                class="sapUiSmallMarginTop"
+                                press="onDealerGo"/>
+
+                    </HBox>
+                </WizardStep>
+
+
+                <!-- step 2 -->
+                <WizardStep
+                    id="ModelStep"
+                    title="Model Allocation"
+                    validated="false">
+
+                    <Table items="{/Models}">
+
+                        <columns>
+                            <Column><Text text="Model Code"/></Column>
+                            <Column><Text text="Available Stock"/></Column>
+                            <Column><Text text="Order Qty"/></Column>
+                            <Column><Text text="Allocation Qty"/></Column>
+                        </columns>
+
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <Text text="{modelCode}"/>
+                                    <Text text="{availableStock}"/>
+                                    <Text text="{orderQty}"/>
+                                    <Input value="{allocationQty}"
+                                           type="Number"
+                                           liveChange="onAllocationChange"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+
+                    </Table>
+
+                    <Button text="Save Allocation"
+                            type="Accept"
+                            class="sapUiSmallMarginTop"
+                            press="onSave"/>
+
+                </WizardStep>
+
+            </Wizard>
+
+        </content>
+
+    </Page>
+</mvc:View>
