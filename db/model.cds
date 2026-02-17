@@ -7,6 +7,7 @@ entity Dealers {
         fundAvailability  : Decimal;
         limitAvailability : Decimal;
         infOtherAmount    : Decimal;
+        infType           : String;
         allocations       : Association to many Models
                                 on allocations.dealers = $self;
 }
