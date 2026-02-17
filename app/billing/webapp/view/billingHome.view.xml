@@ -2,148 +2,240 @@
     controllerName="billing.controller.billingHome"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:core="sap.ui.core">
-
-    <Page id="page" title="Billing Allocation">
-
+    xmlns:core="sap.ui.core"
+>
+    <Page
+        id="page"
+        title="Billing Allocation"
+    >
         <content>
-
-            <Wizard id="BillingWizard" showNextButton="false">
-                
+            <Wizard
+                id="BillingWizard"
+                showNextButton="false"
+            >
                 <WizardStep
                     id="DealerStep"
                     title="Dealer Information"
-                    validated="false">
-
+                    validated="false"
+                >
                     <VBox class="sapUiResponsiveMargin">
-
-                        <HBox class="sapUiSmallMargin" alignItems="End" justifyContent="SpaceBetween">
-
+                        <HBox
+                            class="sapUiSmallMargin"
+                            alignItems="End"
+                            justifyContent="SpaceBetween"
+                        >
                             <VBox width="15%">
-                                <Label text="Select Dealer ID :" class="sapUiSmallMarginBottom"/>
-                                <Select 
-                                    id="dealerSelect"
+                                <Label
+                                    text="Select Dealer ID :"
+                                    class="sapUiSmallMarginBottom"
+                                />
+                                <Input
+                                    id="dealerInput"
                                     width="100%"
-                                    items="{/Dealer}"
-                                    change="onDealerSelect">
-                                    <core:Item key="{dealerID}"
-                                               text="{dealerID} - {dealerName}"/>
-                                </Select>
+                                    placeholder="Enter Dealer ID or Name"
+                                    showSuggestion="true"
+                                    filterSuggests="false"
+                                    startSuggestion="1"
+                                    suggest="onDealerSuggest"
+                                    suggestionItemSelected="onDealerSelect"
+                                    liveChange="onDealerLiveChange"
+                                    suggestionRows="{
+        path: '/Dealer'
+    }"
+                                >
+                                    <!-- Column headers -->
+                                    <suggestionColumns>
+                                        <Column>
+                                            <Label text="Dealer ID" />
+                                        </Column>
+                                        <Column>
+                                            <Label text="Dealer Name" />
+                                        </Column>
+                                    </suggestionColumns>
+
+                                    <!-- Row template -->
+                                    <suggestionRows>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{dealerID}" />
+                                                <Text text="{dealerName}" />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </suggestionRows>
+                                </Input>
                             </VBox>
 
                             <VBox width="15%">
-                                <Label text="Dealer Name :" class="sapUiSmallMarginBottom"/>
-                                <Input value="{/dealerName}" editable="false" width="100%"/>
+                                <Label
+                                    text="Dealer Name :"
+                                    class="sapUiSmallMarginBottom"
+                                />
+                                <Input
+                                    value="{view>/dealerName}"
+                                    editable="false"
+                                />
                             </VBox>
 
                             <VBox width="15%">
-                                <Label text="Fund Availability :" class="sapUiSmallMarginBottom"/>
-                                <Input value="{/fundAvailability}" editable="false" width="100%" textAlign="Right"/>
+                                <Label
+                                    text="Fund Availability :"
+                                    class="sapUiSmallMarginBottom"
+                                />
+                                <Input
+                                    value="{view>/fundAvailability}"
+                                    editable="false"
+                                />
                             </VBox>
 
                             <VBox width="15%">
-                                <Label text="Limit Available (in INF) :" class="sapUiSmallMarginBottom"/>
-                                <Input 
-                                    value="{/limitAvailability}" editable="false" width="100%" textAlign="Right"/>
+                                <Label
+                                    text="Limit Available (in INF) :"
+                                    class="sapUiSmallMarginBottom"
+                                />
+                                <Input
+                                    value="{view>/limitAvailability}"
+                                    editable="false"
+                                />
                             </VBox>
 
                             <VBox width="15%">
-                                <Label text="INF Other ( X ) Account" class="sapUiSmallMarginBottom"/>
-                                <Input 
-                                    value="{/infOtherAmount}" editable="false" width="100%" textAlign="Right"/>
+                                <Label
+                                    text="INF Other ( X ) Account"
+                                    class="sapUiSmallMarginBottom"
+                                />
+                                <Input
+                                    value="{view>/infOtherAmount}"
+                                    editable="false"
+                                />
                             </VBox>
                             <VBox class="sapUiSmallMarginTop">
-                            <Button 
-                                text="Go" 
-                                type="Emphasized"
-                                press="onDealerGo"                    
-                                width="150px"
+                                <Button
+                                    text="Go"
+                                    type="Emphasized"
+                                    press="onDealerGo"
+                                    width="150px"
                                 />
-                        </VBox>
-
+                            </VBox>
                         </HBox>
-
                     </VBox>
-
                 </WizardStep>
 
                 <WizardStep
                     id="ModelStep"
                     title="Model Allocation"
-                    validated="false">
-
+                    validated="false"
+                >
                     <VBox class="sapUiResponsiveMargin">
-                        
                         <HBox class="sapUiSmallMarginBottom">
-                            <Title text="Model Allocation Details" level="H3"/>
+                            <Title
+                                text="Model Allocation Details"
+                                level="H3"
+                            />
                         </HBox>
 
-                        <Table 
+                        <Table
                             id="allocationTable"
                             items="{/Model}"
-                            class="sapUiResponsiveMargin">
-
+                            class="sapUiResponsiveMargin"
+                        >
                             <columns>
-                                <Column width="15%" demandPopin="true" minScreenWidth="Tablet">
-                                    <Text text="Model Code"/>
+                                <Column
+                                    width="15%"
+                                    demandPopin="true"
+                                    minScreenWidth="Tablet"
+                                >
+                                    <Text text="Model Code" />
                                 </Column>
-                                <Column width="25%" demandPopin="true" minScreenWidth="Tablet">
-                                    <Text text="Model Description"/>
+                                <Column
+                                    width="25%"
+                                    demandPopin="true"
+                                    minScreenWidth="Tablet"
+                                >
+                                    <Text text="Model Description" />
                                 </Column>
-                                <Column width="12%" demandPopin="true" minScreenWidth="Tablet" hAlign="Right">
-                                    <Text text="Available Stock"/>
+                                <Column
+                                    width="12%"
+                                    demandPopin="true"
+                                    minScreenWidth="Tablet"
+                                    hAlign="Right"
+                                >
+                                    <Text text="Available Stock" />
                                 </Column>
-                                <Column width="12%" demandPopin="true" minScreenWidth="Tablet" hAlign="Right">
-                                    <Text text="Order Qty"/>
+                                <Column
+                                    width="12%"
+                                    demandPopin="true"
+                                    minScreenWidth="Tablet"
+                                    hAlign="Right"
+                                >
+                                    <Text text="Order Qty" />
                                 </Column>
-                                <Column width="15%" demandPopin="true" minScreenWidth="Tablet" hAlign="Right">
-                                    <Text text="Allocation Qty"/>
+                                <Column
+                                    width="15%"
+                                    demandPopin="true"
+                                    minScreenWidth="Tablet"
+                                    hAlign="Right"
+                                >
+                                    <Text text="Allocation Qty" />
                                 </Column>
-                                <Column width="12%" demandPopin="true" minScreenWidth="Tablet" hAlign="Right">
-                                    <Text text="Per Bike Value"/>
+                                <Column
+                                    width="12%"
+                                    demandPopin="true"
+                                    minScreenWidth="Tablet"
+                                    hAlign="Right"
+                                >
+                                    <Text text="Per Bike Value" />
                                 </Column>
                             </columns>
 
                             <items>
                                 <ColumnListItem>
                                     <cells>
-                                        <Text text="{modelCode}"/>
-                                        <Text text="{modelDesc}"/>
-                                        <Text text="{availableStock}" textAlign="Right"/>
-                                        <Text text="{orderQty}" textAlign="Right"/>
-                                        <Input 
+                                        <Text text="{modelCode}" />
+                                        <Text text="{modelDesc}" />
+                                        <Text
+                                            text="{availableStock}"
+                                            textAlign="Right"
+                                        />
+                                        <Text
+                                            text="{orderQty}"
+                                            textAlign="Right"
+                                        />
+                                        <Input
                                             value="{allocationQty}"
                                             type="Number"
                                             liveChange="onAllocationChange"
                                             width="100%"
-                                            textAlign="Right"/>
-                                        <Text text="{perBikeValue}" textAlign="Right"/>
+                                            textAlign="Right"
+                                        />
+                                        <Text
+                                            text="{perBikeValue}"
+                                            textAlign="Right"
+                                        />
                                     </cells>
                                 </ColumnListItem>
                             </items>
-
                         </Table>
-
                     </VBox>
 
-                    <HBox class="sapUiSmallMarginTop" justifyContent="SpaceBetween">
-                        <Button 
-                            text="Previous" 
+                    <HBox
+                        class="sapUiSmallMarginTop"
+                        justifyContent="SpaceBetween"
+                    >
+                        <Button
+                            text="Previous"
                             type="Default"
                             press="onModelPrevious"
-                            width="120px"/>
-                        <Button 
-                            text="Save Allocation" 
+                            width="120px"
+                        />
+                        <Button
+                            text="Save Allocation"
                             type="Accept"
                             press="onSaveAllocation"
-                            width="150px"/>
+                            width="150px"
+                        />
                     </HBox>
-
                 </WizardStep>
-
             </Wizard>
-
         </content>
-
     </Page>
 </mvc:View>

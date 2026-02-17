@@ -7,65 +7,71 @@ sap.ui.define([
     return Controller.extend("billing.controller.billingHome", {
 
         onInit() {
-            // Sample dealer data - replace with your actual data source / OData call
-            const oData = {
-                Dealer: [
-                    {
-                        dealerID: "D001",
-                        dealerName: "AutoHub Motors",
-                        fundAvailability: "5,00,000",
-                        limitAvailability: "3,50,000",
-                        infOtherAmount: "75,000"
-                    },
-                    {
-                        dealerID: "D002",
-                        dealerName: "SpeedWheels Pvt Ltd",
-                        fundAvailability: "8,00,000",
-                        limitAvailability: "6,00,000",
-                        infOtherAmount: "1,20,000"
-                    },
-                    {
-                        dealerID: "D003",
-                        dealerName: "City Bikes & Co",
-                        fundAvailability: "2,50,000",
-                        limitAvailability: "1,80,000",
-                        infOtherAmount: "40,000"
-                    }
-                ],
 
-                // Selected dealer fields (bound to the input fields)
+            // UI State Model (only for selected dealer details)
+            const oViewModel = new JSONModel({
                 dealerName: "",
                 fundAvailability: "",
                 limitAvailability: "",
                 infOtherAmount: "",
-
                 Model: []
-            };
+            });
 
-            const oModel = new JSONModel(oData);
-            this.getView().setModel(oModel);
-        },
+            this.getView().setModel(oViewModel, "view");
+        }
+        ,
 
-        onDealerSelect(oEvent) {
-            const oModel = this.getView().getModel();
-            const oDealerList = oModel.getProperty("/Dealer");
+        onDealerSuggest(oEvent) {
 
-            // Get the selected key from the Select control
-            const sSelectedKey = oEvent.getSource().getSelectedKey();
+            const sValue = oEvent.getParameter("suggestValue");
+            const oInput = oEvent.getSource();
+            const oBinding = oInput.getBinding("suggestionItems");
 
-            // Find the matching dealer object
-            const oSelectedDealer = oDealerList.find(
-                (dealer) => dealer.dealerID === sSelectedKey
-            );
+            if (!oBinding) return;
 
-            if (oSelectedDealer) {
-                // Update the model properties — inputs will auto-refresh via binding
-                oModel.setProperty("/dealerName", oSelectedDealer.dealerName);
-                oModel.setProperty("/fundAvailability", oSelectedDealer.fundAvailability);
-                oModel.setProperty("/limitAvailability", oSelectedDealer.limitAvailability);
-                oModel.setProperty("/infOtherAmount", oSelectedDealer.infOtherAmount);
+            if (!sValue) {
+                oBinding.filter([]);
+                return;
             }
+
+            const Filter = sap.ui.model.Filter;
+            const FilterOperator = sap.ui.model.FilterOperator;
+
+            const oFilter = new Filter({
+                filters: [
+                    new Filter("dealerID", FilterOperator.Contains, sValue),
+                    new Filter("dealerName", FilterOperator.Contains, sValue)
+                ],
+                and: false
+            });
+
+            oBinding.filter([oFilter]);
         },
+        onDealerSelect(oEvent) {
+
+            const oRow = oEvent.getParameter("selectedRow");
+            if (!oRow) return;
+
+            const oContext = oRow.getBindingContext();
+            const oDealer = oContext.getObject();
+            const sDealerID = oDealer.dealerID;
+
+            const oModel = this.getView().getModel(); // OData V4 model
+            const oViewModel = this.getView().getModel("view");
+
+            // Bind selected dealer context (READ full entity)
+            const sPath = `/Dealer('${sDealerID}')`;
+
+            oModel.bindContext(sPath).requestObject().then((oFullDealer) => {
+
+                oViewModel.setProperty("/dealerName", oFullDealer.dealerName);
+                oViewModel.setProperty("/fundAvailability", oFullDealer.fundAvailability);
+                oViewModel.setProperty("/limitAvailability", oFullDealer.limitAvailability);
+                oViewModel.setProperty("/infOtherAmount", oFullDealer.infOtherAmount);
+
+            });
+        },
+       
 
         onDealerGo() {
             // Your Go button logic here
