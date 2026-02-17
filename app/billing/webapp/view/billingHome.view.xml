@@ -9,8 +9,7 @@
         <content>
 
             <Wizard id="BillingWizard" showNextButton="false">
-
-                <!-- step 1: Dealer Information -->
+                
                 <WizardStep
                     id="DealerStep"
                     title="Dealer Information"
@@ -18,10 +17,8 @@
 
                     <VBox class="sapUiResponsiveMargin">
 
-                        <!-- Row 1: Horizontal Layout for Dealer Fields -->
                         <HBox class="sapUiSmallMargin" alignItems="End" justifyContent="SpaceBetween">
 
-                            <!-- Select Dealer ID -->
                             <VBox width="15%">
                                 <Label text="Select Dealer ID :" class="sapUiSmallMarginBottom"/>
                                 <Select 
@@ -34,7 +31,6 @@
                                 </Select>
                             </VBox>
 
-                            <!-- Dealer Name -->
                             <VBox width="15%">
                                 <Label text="Dealer Name :" class="sapUiSmallMarginBottom"/>
                                 <Input 
@@ -43,7 +39,6 @@
                                     width="100%"/>
                             </VBox>
 
-                            <!-- Fund Availability -->
                             <VBox width="15%">
                                 <Label text="Fund Availability :" class="sapUiSmallMarginBottom"/>
                                 <Input 
@@ -56,7 +51,6 @@
                                     textAlign="Right"/>
                             </VBox>
 
-                            <!-- Limit Available (INF) -->
                             <VBox width="15%">
                                 <Label text="Limit Available (in INF) :" class="sapUiSmallMarginBottom"/>
                                 <Input 
@@ -69,7 +63,6 @@
                                     textAlign="Right"/>
                             </VBox>
 
-                            <!-- INF Other Account -->
                             <VBox width="15%">
                                 <Label text="INF Other ( X ) Account" class="sapUiSmallMarginBottom"/>
                                 <Input 
@@ -91,15 +84,10 @@
 
                         </HBox>
 
-                        <!-- Row 2: Go Button -->
-                        
-
                     </VBox>
 
                 </WizardStep>
 
-
-                <!-- step 2: Model Allocation -->
                 <WizardStep
                     id="ModelStep"
                     title="Model Allocation"
