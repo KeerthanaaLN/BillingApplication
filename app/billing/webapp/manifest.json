@@ -17,10 +17,9 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/odata/v4/billing-servcie/",
+        "uri": "/odata/v4/billing/",
         "type": "OData",
         "settings": {
-          "annotations": [],
           "odataVersion": "4.0"
         }
       }

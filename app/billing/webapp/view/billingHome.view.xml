@@ -34,7 +34,7 @@
                             <VBox width="15%">
                                 <Label text="Dealer Name :" class="sapUiSmallMarginBottom"/>
                                 <Input 
-                                    value="{/selectedDealer/dealerName}" 
+                                    value="{dealerName}" 
                                     editable="false"
                                     width="100%"/>
                             </VBox>
@@ -43,7 +43,7 @@
                                 <Label text="Fund Availability :" class="sapUiSmallMarginBottom"/>
                                 <Input 
                                     value="{
-                                        path: '/selectedDealer/fundAvailability',
+                                        path: 'fundAvailability',
                                         type: 'sap.ui.model.type.Currency'
                                     }" 
                                     editable="false"
@@ -55,7 +55,7 @@
                                 <Label text="Limit Available (in INF) :" class="sapUiSmallMarginBottom"/>
                                 <Input 
                                     value="{
-                                        path: '/selectedDealer/limitAvailability',
+                                        path: 'limitAvailability',
                                         type: 'sap.ui.model.type.Currency'
                                     }" 
                                     editable="false"
@@ -67,7 +67,7 @@
                                 <Label text="INF Other ( X ) Account" class="sapUiSmallMarginBottom"/>
                                 <Input 
                                     value="{
-                                        path: '/selectedDealer/infOtherAmount',
+                                        path: 'infOtherAmount',
                                         type: 'sap.ui.model.type.Currency'
                                     }" 
                                     editable="false"
@@ -102,7 +102,7 @@
 
                         <Table 
                             id="allocationTable"
-                            items="{/Models}"
+                            items="{/Model}"
                             class="sapUiResponsiveMargin">
 
                             <columns>
