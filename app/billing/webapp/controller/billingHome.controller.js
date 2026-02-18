@@ -109,67 +109,67 @@ sap.ui.define([
 
         async onDealerGo() {
 
-    const oViewModel = this.getView().getModel("view");
-    const oODataModel = this.getView().getModel();
-    const oWizard = this.byId("BillingWizard");
-    const oDealerStep = this.byId("DealerStep");
+            const oViewModel = this.getView().getModel("view");
+            const oODataModel = this.getView().getModel();
+            const oWizard = this.byId("BillingWizard");
+            const oDealerStep = this.byId("DealerStep");
 
-    const sDealerID = oViewModel.getProperty("/selectedDealerID");
-    const sDealerType = oViewModel.getProperty("/infType");
-    const fFund = parseFloat(oViewModel.getProperty("/fundAvailability")) || 0;
-    const fLimit = parseFloat(oViewModel.getProperty("/limitAvailability")) || 0;
+            const sDealerID = oViewModel.getProperty("/selectedDealerID");
+            const sDealerType = oViewModel.getProperty("/infType");
+            const fFund = parseFloat(oViewModel.getProperty("/fundAvailability")) || 0;
+            const fLimit = parseFloat(oViewModel.getProperty("/limitAvailability")) || 0;
 
-    const MIN_FUND = 200000;
+            const MIN_FUND = 200000;
 
-    if (!sDealerID) {
-        MessageBox.error("Please select a dealer.");
-        return;
-    }
+            if (!sDealerID) {
+                MessageBox.error("Please select a dealer.");
+                return;
+            }
 
-    if (fFund <= MIN_FUND) {
-        MessageBox.error("Fund Availability must be above 2 Lakhs.");
-        return;
-    }
+            if (fFund <= MIN_FUND) {
+                MessageBox.error("Fund Availability must be above 2 Lakhs.");
+                return;
+            }
 
-    if (sDealerType === "INF" && fLimit !== 0) {
-        MessageBox.error("INF dealer must have Limit Available = 0.");
-        return;
-    }
+            if (sDealerType === "INF" && fLimit !== 0) {
+                MessageBox.error("INF dealer must have Limit Available = 0.");
+                return;
+            }
 
-    if (sDealerType === "NON-INF" && fLimit === 0) {
-        MessageBox.error("NON-INF dealer must have Limit Available greater than 0.");
-        return;
-    }
+            if (sDealerType === "NON-INF" && fLimit === 0) {
+                MessageBox.error("NON-INF dealer must have Limit Available greater than 0.");
+                return;
+            }
 
-    try {
+            try {
 
-        const oListBinding = oODataModel.bindList("/Model");
-        const aContexts = await oListBinding.requestContexts();
+                const oListBinding = oODataModel.bindList("/Model");
+                const aContexts = await oListBinding.requestContexts();
 
-        const aModels = aContexts.map(ctx => {
+                const aModels = aContexts.map(ctx => {
 
-            const obj = ctx.getObject();
+                    const obj = ctx.getObject();
 
-            return {
-                ...obj,
-                _context: ctx,           
-                allocationQty: 0,
-                orderValue: 0
-            };
-        });
+                    return {
+                        ...obj,
+                        _context: ctx,
+                        allocationQty: 0,
+                        orderValue: 0
+                    };
+                });
 
-        oViewModel.setProperty("/Model", aModels);
+                oViewModel.setProperty("/Model", aModels);
 
-        oDealerStep.setValidated(true);
-        oWizard.nextStep();
+                oDealerStep.setValidated(true);
+                oWizard.nextStep();
 
-        this._calculateInitialTotals();
+                this._calculateInitialTotals();
 
-    } catch (err) {
-        MessageBox.error("Error loading models.");
-    }
-}
-,
+            } catch (err) {
+                MessageBox.error("Error loading models.");
+            }
+        }
+        ,
 
         onAllocationChange(oEvent) {
 
@@ -218,28 +218,18 @@ sap.ui.define([
             const aModels = oViewModel.getProperty("/Model") || [];
             const dealerFund = parseFloat(oViewModel.getProperty("/fundAvailability")) || 0;
 
-            let totalStock = 0;
-            let totalAvailable = 0;
-            let totalFundRequired = 0;
-            let totalAllocationQty = 0;
             let totalOrderValue = 0;
 
+            // 🔹 First calculate total WITHOUT modifying model
             aModels.forEach(model => {
 
                 const qty = parseInt(model.allocationQty, 10) || 0;
                 const price = parseFloat(model.perBikeValue) || 0;
 
-                const orderValue = qty * price;
-
-                model.orderValue = orderValue;
-
-                totalStock += parseFloat(model.depotStock) || 0;
-                totalAvailable += parseFloat(model.availableStock) || 0;
-                totalFundRequired += parseFloat(model.fundRequired) || 0;
-                totalAllocationQty += qty;
-                totalOrderValue += orderValue;
+                totalOrderValue += qty * price;
             });
 
+            // 🔥 Validate fund BEFORE updating anything
             if (totalOrderValue > dealerFund) {
 
                 MessageBox.error(
@@ -247,8 +237,27 @@ sap.ui.define([
                     ") exceeds Dealer Fund (" + dealerFund.toLocaleString() + ")."
                 );
 
-                return;
+                return; // ❌ Exit before modifying model
             }
+
+            // ✅ Now safe to update model
+            let totalStock = 0;
+            let totalAvailable = 0;
+            let totalFundRequired = 0;
+            let totalAllocationQty = 0;
+
+            aModels.forEach(model => {
+
+                const qty = parseInt(model.allocationQty, 10) || 0;
+                const price = parseFloat(model.perBikeValue) || 0;
+
+                model.orderValue = qty * price;
+
+                totalStock += parseFloat(model.depotStock) || 0;
+                totalAvailable += parseFloat(model.availableStock) || 0;
+                totalFundRequired += parseFloat(model.fundRequired) || 0;
+                totalAllocationQty += qty;
+            });
 
             oViewModel.setProperty("/Model", aModels);
             oViewModel.setProperty("/totalStock", totalStock);
