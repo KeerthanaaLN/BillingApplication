@@ -4,15 +4,14 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
 >
-    <Page
-        id="page"
-        title="Billing Allocation"
-    >
+    <Page title="Billing Allocation">
         <content>
             <Wizard
                 id="BillingWizard"
                 showNextButton="false"
             >
+                <!-- ================= DEALER STEP ================= -->
+
                 <WizardStep
                     id="DealerStep"
                     title="Dealer Information"
@@ -24,6 +23,7 @@
                             alignItems="End"
                             justifyContent="SpaceBetween"
                         >
+                            <!-- Dealer Suggest -->
                             <VBox width="250px">
                                 <Label
                                     text="Select Dealer ID :"
@@ -39,9 +39,13 @@
                                     suggest="onDealerSuggest"
                                     suggestionItemSelected="onDealerSelect"
                                     liveChange="onDealerLiveChange"
-                                    suggestionRows="{ path: '/Dealer',parameters: {$select: 'dealerID,dealerName'}}">
+                                    suggestionRows="{
+                                        path: '/Dealer',
+                                        parameters: {$select: 'dealerID,dealerName'}
+                                    }"
+                                >
                                     <suggestionColumns>
-                                        <Column width="250px">
+                                        <Column>
                                             <Label text="Dealer ID" />
                                         </Column>
                                     </suggestionColumns>
@@ -49,13 +53,16 @@
                                     <suggestionRows>
                                         <ColumnListItem>
                                             <cells>
-                                                <Text text="{dealerID} - {dealerName}" />
+                                                <Text
+                                                    text="{dealerID} - {dealerName}"
+                                                />
                                             </cells>
                                         </ColumnListItem>
                                     </suggestionRows>
                                 </Input>
                             </VBox>
 
+                            <!-- Dealer Info -->
                             <VBox width="15%">
                                 <Label
                                     text="Dealer Name :"
@@ -80,7 +87,7 @@
 
                             <VBox width="15%">
                                 <Label
-                                    text="Limit Available (in INF) :"
+                                    text="Limit Available :"
                                     class="sapUiSmallMarginBottom"
                                 />
                                 <Input
@@ -91,7 +98,7 @@
 
                             <VBox width="15%">
                                 <Label
-                                    text="INF Other ( X ) Account"
+                                    text="INF Other Account :"
                                     class="sapUiSmallMarginBottom"
                                 />
                                 <Input
@@ -99,8 +106,9 @@
                                     editable="false"
                                 />
                             </VBox>
+
                             <VBox class="sapUiSmallMarginTop">
-                                 <Button
+                                <Button
                                     text="Go"
                                     type="Emphasized"
                                     press="onDealerGo"
@@ -112,48 +120,71 @@
                     </VBox>
                 </WizardStep>
 
+                <!-- ================= MODEL STEP ================= -->
+
                 <WizardStep
                     id="ModelStep"
                     title="Model Allocation Info"
                     validated="false"
                 >
                     <VBox class="sapUiResponsiveMargin">
+                        <!-- ===== Totals Section ===== -->
 
-                        <HBox class="sapUiSmallMarginBottom" justifyContent="End">
-
-                            <HBox class="sapUiTinyMarginStart">
+                        <HBox
+                            justifyContent="End"
+                            class="sapUiSmallMarginBottom"
+                        >
+                            <HBox class="sapUiTinyMarginStart sapUiTinyMarginEnd">
                                 <Text text="Total Stock : " />
-                                <Text text="{view>/totalStock}" class="sapUiTinyMarginBegin sapUiSmallMarginEnd"/>
+                                <Text
+                                    text="{view>/totalStock}"
+                                    class="sapUiTinyMarginBegin"
+                                />
                             </HBox>
 
-                            <HBox class="sapUiTinyMarginStart">
+                            <HBox class="sapUiTinyMarginStart sapUiTinyMarginEnd">
                                 <Text text="Total Available : " />
-                                <Text text="{view>/totalAvailable}" class="sapUiTinyMarginBegin sapUiSmallMarginEnd"/>
+                                <Text
+                                    text="{view>/totalAvailable}"
+                                    class="sapUiTinyMarginBegin"
+                                />
                             </HBox>
 
-                            <HBox class="sapUiTinyMarginStart">
+                            <HBox class="sapUiTinyMarginStart sapUiTinyMarginEnd">
                                 <Text text="Fund Required : " />
-                                <Text text="{view>/totalFundRequired}" class="sapUiTinyMarginBegin sapUiSmallMarginEnd"/>
+                                <Text
+                                    text="{view>/totalFundRequired}"
+                                    class="sapUiTinyMarginBegin"
+                                />
                             </HBox>
 
-                            <HBox class="sapUiTinyMarginStart">
+                            <HBox class="sapUiTinyMarginStart sapUiTinyMarginEnd">
                                 <Text text="Allocation Qty : " />
-                                <Text text="{view>/totalAllocationQty}" class="sapUiTinyMarginBegin sapUiSmallMarginEnd"/>
+                                <Text
+                                    text="{view>/totalAllocationQty}"
+                                    class="sapUiTinyMarginBegin"
+                                />
                             </HBox>
 
-                            <HBox class="sapUiTinyMarginStart">
+                            <HBox class="sapUiTinyMarginStart sapUiTinyMarginEnd">
                                 <Text text="Total Value : " />
-                                <Text text="{view>/totalOrderValue}" class="sapUiTinyMarginBegin"/>
+                                <Text
+                                    text="{view>/totalOrderValue}"
+                                    class="sapUiTinyMarginBegin"
+                                />
                             </HBox>
-
                         </HBox>
 
-                        <HBox justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
+                        <!-- ===== Action Buttons ===== -->
 
+                        <HBox
+                            justifyContent="SpaceBetween"
+                            class="sapUiSmallMarginBottom"
+                        >
                             <Text
-                                text="* Disclaimer: Please review all quantities carefully before saving."
-                                class="sapUiSmallMarginTop disclaimerText"
+                                text="* Please review all quantities carefully before calculating."
                                 wrapping="true"
+                                class="disclaimerText"
                             />
 
                             <HBox>
@@ -161,95 +192,78 @@
                                     text="Calculate Allocation"
                                     type="Emphasized"
                                     press="onCalculateAllocation"
+                                    enabled="{view>/calculateEnabled}"
                                     class="sapUiTinyMarginEnd"
                                 />
+
                                 <Button
                                     text="Save Allocation"
                                     type="Accept"
                                     press="onSaveAllocation"
                                 />
                             </HBox>
-
                         </HBox>
 
-
+                        <!-- ===== MAIN MODEL TABLE ===== -->
 
                         <Table
                             id="allocationTable"
-                            items="{
-                                path: '/Model',
-                                parameters: {
-                                    $select: 'modelCode,modelDesc,depotStock,allocatedQty,availableStock,fundRequired,allocationQty,perBikeValue,orderValue,fst,red,yellow,black,green,rationalAllocation,snopAllocation,totalAllocation'
-                                }
-                            }"
+                            items="{view>/Model}"
+                            alternateRowColors="true"
                         >
                             <columns>
-                                <Column
-                                    width="12%"
-                                    demandPopin="true"
-                                    minScreenWidth="Tablet"
-                                >
+                                <Column width="12%">
                                     <Text text="Model Code" />
                                 </Column>
-                                <Column
-                                    width="32%"
-                                    demandPopin="true"
-                                    minScreenWidth="Tablet"
-                                >
+
+                                <Column width="25%">
                                     <Text text="Model Description" />
                                 </Column>
+
                                 <Column
-                                    width="10%"
-                                    demandPopin="true"
-                                    minScreenWidth="Tablet"
+                                    width="8%"
                                     hAlign="Right"
                                 >
                                     <Text text="Depot Stock" />
                                 </Column>
+
                                 <Column
-                                    width="10%"
-                                    demandPopin="true"
-                                    minScreenWidth="Tablet"
+                                    width="8%"
                                     hAlign="Right"
                                 >
                                     <Text text="Allocated Qty" />
                                 </Column>
+
                                 <Column
-                                    width="10%"
-                                    demandPopin="true"
-                                    minScreenWidth="Tablet"
+                                    width="8%"
                                     hAlign="Right"
                                 >
                                     <Text text="Available Stock" />
                                 </Column>
+
                                 <Column
-                                    width="12%"
-                                    demandPopin="true"
-                                    minScreenWidth="Tablet"
+                                    width="10%"
                                     hAlign="Right"
                                 >
                                     <Text text="Fund Required" />
                                 </Column>
+
                                 <Column
-                                    width="10%"
-                                    demandPopin="true"
-                                    minScreenWidth="Tablet"
+                                    width="8%"
                                     hAlign="Right"
                                 >
                                     <Text text="Allocation Qty" />
                                 </Column>
+
                                 <Column
-                                    width="12%"
-                                    demandPopin="true"
-                                    minScreenWidth="Tablet"
+                                    width="10%"
                                     hAlign="Right"
                                 >
                                     <Text text="Per Bike Value" />
                                 </Column>
+
                                 <Column
-                                    width="12%"
-                                    demandPopin="true"
-                                    minScreenWidth="Tablet"
+                                    width="11%"
                                     hAlign="Right"
                                 >
                                     <Text text="Order Value" />
@@ -259,40 +273,43 @@
                             <items>
                                 <ColumnListItem>
                                     <cells>
+                                        <!-- Clickable Model Code -->
                                         <Link
-                                            text="{modelCode}"
+                                            text="{view>modelCode}"
                                             press="onModelSelect"
                                         />
-                                        <Text text="{modelDesc}" />
+
+                                        <Text text="{view>modelDesc}" />
                                         <Text
-                                            text="{depotStock}"
+                                            text="{view>depotStock}"
                                             textAlign="Right"
                                         />
                                         <Text
-                                            text="{allocatedQty}"
+                                            text="{view>allocatedQty}"
                                             textAlign="Right"
                                         />
                                         <Text
-                                            text="{availableStock}"
+                                            text="{view>availableStock}"
                                             textAlign="Right"
                                         />
                                         <Text
-                                            text="{fundRequired}"
+                                            text="{view>fundRequired}"
                                             textAlign="Right"
                                         />
+
                                         <Input
-                                            value="{allocationQty}"
+                                            value="{view>allocationQty}"
                                             type="Number"
                                             liveChange="onAllocationChange"
-                                            width="100%"
+                                            textAlign="Right"
+                                        />
+
+                                        <Text
+                                            text="{view>perBikeValue}"
                                             textAlign="Right"
                                         />
                                         <Text
-                                            text="{perBikeValue}"
-                                            textAlign="Right"
-                                        />
-                                        <Text
-                                            text="{orderValue}"
+                                            text="{view>orderValue}"
                                             textAlign="Right"
                                         />
                                     </cells>
@@ -300,22 +317,39 @@
                             </items>
                         </Table>
 
+                        <!-- ===== MODEL DETAIL TABLE ===== -->
+
                         <Table
                             id="modelDetailTable"
                             items="{view>/modelDetails}"
                             visible="{view>/showModelDetails}"
-                            class="sapUiResponsiveMargin"
+                            class="sapUiResponsiveMargin sapUiSmallMarginTop"
                         >
-
                             <columns>
-                                <Column><Text text="FST"/></Column>
-                                <Column><Text text="Red"/></Column>
-                                <Column><Text text="Yellow"/></Column>
-                                <Column><Text text="Black"/></Column>
-                                <Column><Text text="Green"/></Column>
-                                <Column><Text text="Rational Allocation"/></Column>
-                                <Column><Text text="SNOP Allocation"/></Column>
-                                <Column><Text text="Total Allocation"/></Column>
+                                <Column>
+                                    <Text text="FST" class="fstHeader"/>
+                                </Column>
+                                <Column>
+                                    <Text text="Red" class="redHeader"/>
+                                </Column>
+                                <Column>
+                                    <Text text="Yellow" class="yellowHeader"/>
+                                </Column>
+                                <Column>
+                                    <Text text="Black" class="blackHeader"/>
+                                </Column>
+                                <Column>
+                                    <Text text="Green" class="greenHeader"/>
+                                </Column>
+                                <Column>
+                                    <Text text="Rational Allocation" />
+                                </Column>
+                                <Column>
+                                    <Text text="SNOP Allocation" />
+                                </Column>
+                                <Column>
+                                    <Text text="Total Allocation" />
+                                </Column>
                             </columns>
 
                             <items>
@@ -326,26 +360,21 @@
                                         <Text text="{view>yellow}" />
                                         <Text text="{view>black}" />
                                         <Text text="{view>green}" />
-                                        <Text text="{view>rationalAllocation}" />
+                                        <Text
+                                            text="{view>rationalAllocation}"
+                                        />
                                         <Text text="{view>snopAllocation}" />
                                         <Text text="{view>totalAllocation}" />
                                     </cells>
                                 </ColumnListItem>
                             </items>
-
                         </Table>
-
                     </VBox>
 
-                    <HBox
-                        class="sapUiSmallMarginTop"
-                        justifyContent="SpaceBetween"
-                    >
+                    <HBox class="sapUiSmallMarginTop">
                         <Button
                             text="Previous"
-                            type="Default"
                             press="onModelPrevious"
-                            width="120px"
                         />
                     </HBox>
                 </WizardStep>

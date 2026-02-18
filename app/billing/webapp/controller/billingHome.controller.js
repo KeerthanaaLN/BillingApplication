@@ -1,8 +1,11 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
-    "sap/m/MessageBox"
-], (Controller, JSONModel, MessageBox) => {
+    "sap/m/MessageBox",
+    "sap/m/MessageToast",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], function (Controller, JSONModel, MessageBox, MessageToast, Filter, FilterOperator) {
     "use strict";
 
     return Controller.extend("billing.controller.billingHome", {
@@ -14,43 +17,38 @@ sap.ui.define([
                 fundAvailability: "",
                 limitAvailability: "",
                 infOtherAmount: "",
+                infType: "",
+                selectedDealerID: "",
+                dealerSelected: false,
+
                 Model: [],
-                dealerSelected: false,   
 
                 totalStock: 0,
                 totalAvailable: 0,
-                
                 totalFundRequired: 0,
                 totalAllocationQty: 0,
                 totalOrderValue: 0,
 
                 modelDetails: [],
-                showModelDetails: false
+                showModelDetails: false,
+                calculateEnabled: false
+
             });
 
-
-
             this.getView().setModel(oViewModel, "view");
-        }
-
-        ,
+        },
 
         onDealerSuggest(oEvent) {
 
             const sValue = oEvent.getParameter("suggestValue")?.trim();
-            const oInput = oEvent.getSource();
-            const oBinding = oInput.getBinding("suggestionRows");
+            const oBinding = oEvent.getSource().getBinding("suggestionRows");
 
             if (!oBinding) return;
 
             if (!sValue) {
                 oBinding.filter([]);
-                oBinding.refresh();
                 return;
             }
-
-            const Filter = sap.ui.model.Filter;
-            const FilterOperator = sap.ui.model.FilterOperator;
 
             const oFilter = new Filter({
                 filters: [
@@ -61,38 +59,38 @@ sap.ui.define([
             });
 
             oBinding.filter([oFilter]);
-            oBinding.refresh(); 
         },
+
         onDealerSelect(oEvent) {
 
             const oRow = oEvent.getParameter("selectedRow");
             if (!oRow) return;
 
-            const oContext = oRow.getBindingContext();
-            const oDealer = oContext.getObject();
+            const oDealer = oRow.getBindingContext().getObject();
             const sDealerID = oDealer.dealerID;
 
-            const oModel = this.getView().getModel(); 
+            const oODataModel = this.getView().getModel();
             const oViewModel = this.getView().getModel("view");
-            oViewModel.setProperty("/dealerSelected", true);
 
-            const sPath = `/Dealer('${sDealerID}')`;
+            oViewModel.setProperty("/selectedDealerID", sDealerID);
 
-            oModel.bindContext(sPath).requestObject().then((oFullDealer) => {
+            oODataModel.bindContext(`/Dealer('${sDealerID}')`)
+                .requestObject()
+                .then(oFullDealer => {
 
-                oViewModel.setProperty("/dealerName", oFullDealer.dealerName);
-                oViewModel.setProperty("/fundAvailability", oFullDealer.fundAvailability);
-                oViewModel.setProperty("/limitAvailability", oFullDealer.limitAvailability);
-                oViewModel.setProperty("/infOtherAmount", oFullDealer.infOtherAmount);
-                oViewModel.setProperty("/infType", oFullDealer.infType);
-
-
-
-                oViewModel.setProperty("/dealerSelected", true); 
-            });
-
+                    oViewModel.setProperty("/dealerName", oFullDealer.dealerName);
+                    oViewModel.setProperty("/fundAvailability", oFullDealer.fundAvailability);
+                    oViewModel.setProperty("/limitAvailability", oFullDealer.limitAvailability);
+                    oViewModel.setProperty("/infOtherAmount", oFullDealer.infOtherAmount);
+                    oViewModel.setProperty("/infType", oFullDealer.infType);
+                    oViewModel.setProperty("/dealerSelected", true);
+                });
         },
 
+
+        /* ==========================================
+           DEALER LIVE CHANGE
+        ========================================== */
         onDealerLiveChange(oEvent) {
 
             const sValue = oEvent.getParameter("value");
@@ -104,7 +102,9 @@ sap.ui.define([
                 oViewModel.setProperty("/fundAvailability", "");
                 oViewModel.setProperty("/limitAvailability", "");
                 oViewModel.setProperty("/infOtherAmount", "");
-                oViewModel.setProperty("/dealerSelected", false); 
+                oViewModel.setProperty("/infType", "");
+                oViewModel.setProperty("/selectedDealerID", "");
+                oViewModel.setProperty("/dealerSelected", false);
             }
             else {
                 oViewModel.setProperty("/dealerSelected", false);
@@ -112,20 +112,24 @@ sap.ui.define([
         },
 
 
+        /* ==========================================
+           DEALER GO
+        ========================================== */
         onDealerGo() {
 
             const oViewModel = this.getView().getModel("view");
             const oWizard = this.byId("BillingWizard");
             const oDealerStep = this.byId("DealerStep");
 
-            const sDealerType = oViewModel.getProperty("/infType");   
+            const sDealerID = oViewModel.getProperty("/selectedDealerID");
+            const sDealerType = oViewModel.getProperty("/infType");
             const fFund = parseFloat(oViewModel.getProperty("/fundAvailability")) || 0;
             const fLimit = parseFloat(oViewModel.getProperty("/limitAvailability")) || 0;
 
-            const MIN_FUND = 200000; 
+            const MIN_FUND = 200000;
 
-            if (!sDealerType) {
-                MessageBox.error("Please select a dealer before proceeding.");
+            if (!sDealerID) {
+                MessageBox.error("Please select a dealer.");
                 return;
             }
 
@@ -144,71 +148,176 @@ sap.ui.define([
                 return;
             }
 
-            oDealerStep.setValidated(true);
-            oWizard.nextStep();
-            setTimeout(() => {
-                this._calculateTotals();
-            }, 300);
+            /* Load ALL Models */
+            const oODataModel = this.getView().getModel();
+            const oListBinding = oODataModel.bindList("/Model");
 
+            oListBinding.requestContexts().then(aContexts => {
 
-        },
+                const aModels = aContexts.map(ctx => {
+                    const obj = ctx.getObject();
+                    obj.allocationQty = 0;
+                    obj.orderValue = 0;
+                    return obj;
+                });
 
-        _calculateTotals() {
+                oViewModel.setProperty("/Model", aModels);
 
-            const oTable = this.byId("allocationTable");
-            const aItems = oTable.getItems();
+                oDealerStep.setValidated(true);
+                oWizard.nextStep();
 
-            let totalStock = 0;
-            let totalAvailable = 0;
-            
-            let totalFundRequired = 0;
-            let totalAllocationQty = 0;
-            let totalOrderValue = 0;
+                this._calculateInitialTotals();
 
-            aItems.forEach(item => {
-
-                const oData = item.getBindingContext().getObject();
-
-                totalStock += parseFloat(oData.depotStock) || 0;
-                totalAvailable += parseFloat(oData.availableStock) || 0;
-                
-                totalFundRequired += parseFloat(oData.fundRequired) || 0;
-                totalAllocationQty += parseFloat(oData.allocationQty) || 0;
-                totalOrderValue += (parseFloat(oData.allocationQty) || 0) *
-                                (parseFloat(oData.perBikeValue) || 0);
             });
-
-            const oViewModel = this.getView().getModel("view");
-
-            oViewModel.setProperty("/totalStock", totalStock);
-            oViewModel.setProperty("/totalAvailable", totalAvailable);
-            
-            oViewModel.setProperty("/totalFundRequired", totalFundRequired);
-            oViewModel.setProperty("/totalAllocationQty", totalAllocationQty);
-            oViewModel.setProperty("/totalOrderValue", totalOrderValue);
         },
 
 
+        /* ==========================================
+           ALLOCATION CHANGE (NO LIVE CALCULATION)
+        ========================================== */
         onAllocationChange(oEvent) {
 
             const oInput = oEvent.getSource();
-            const oContext = oInput.getBindingContext();
-            const oModel = oContext.getModel();
+            const oContext = oInput.getBindingContext("view");
+            const oModel = this.getView().getModel("view");
+
+            if (!oContext) return;
+
             const sPath = oContext.getPath();
 
             let iQty = parseInt(oInput.getValue(), 10) || 0;
 
+            const availableStock = parseInt(
+                oModel.getProperty(sPath + "/availableStock"), 10
+            ) || 0;
+
+            /* ================= VALIDATION ================= */
+
+            // Negative not allowed
+            if (iQty < 0) {
+                iQty = 0;
+            }
+
+            // Greater than available stock
+            if (iQty > availableStock) {
+
+                iQty = availableStock;
+
+                sap.m.MessageToast.show(
+                    "Allocation cannot exceed Available Stock (" + availableStock + ")"
+                );
+            }
+
+            // Set corrected value
             oModel.setProperty(sPath + "/allocationQty", iQty);
 
-            const perBike = parseFloat(oModel.getProperty(sPath + "/perBikeValue")) || 0;
-            oModel.setProperty(sPath + "/orderValue", iQty * perBike);
+            /* Enable Calculate Button Logic */
+            const aModels = oModel.getProperty("/Model") || [];
 
-            this._calculateTotals();
+            const hasValue = aModels.some(model =>
+                parseInt(model.allocationQty, 10) > 0
+            );
+
+            oModel.setProperty("/calculateEnabled", hasValue);
         },
 
-        onModelSelect: function (oEvent) {
 
-            const oContext = oEvent.getSource().getBindingContext();
+        /* ==========================================
+           CALCULATE BUTTON
+        ========================================== */
+        onCalculateAllocation() {
+
+            const oViewModel = this.getView().getModel("view");
+            const aModels = oViewModel.getProperty("/Model") || [];
+            const dealerFund = parseFloat(oViewModel.getProperty("/fundAvailability")) || 0;
+
+            let totalStock = 0;
+            let totalAvailable = 0;
+            let totalFundRequired = 0;
+            let totalAllocationQty = 0;
+            let totalOrderValue = 0;
+
+            aModels.forEach(model => {
+
+                const qty = parseInt(model.allocationQty, 10) || 0;
+                const price = parseFloat(model.perBikeValue) || 0;
+
+                const orderValue = qty * price;
+
+                model.orderValue = orderValue;
+
+                totalStock += parseFloat(model.depotStock) || 0;
+                totalAvailable += parseFloat(model.availableStock) || 0;
+                totalFundRequired += parseFloat(model.fundRequired) || 0;
+                totalAllocationQty += qty;
+                totalOrderValue += orderValue;
+            });
+
+            if (totalOrderValue > dealerFund) {
+
+                MessageBox.error(
+                    "Total Order Value (" + totalOrderValue.toLocaleString() +
+                    ") exceeds Dealer Fund (" + dealerFund.toLocaleString() + ")."
+                );
+
+                return;
+            }
+
+            oViewModel.setProperty("/Model", aModels);
+            oViewModel.setProperty("/totalStock", totalStock);
+            oViewModel.setProperty("/totalAvailable", totalAvailable);
+            oViewModel.setProperty("/totalFundRequired", totalFundRequired);
+            oViewModel.setProperty("/totalAllocationQty", totalAllocationQty);
+            oViewModel.setProperty("/totalOrderValue", totalOrderValue);
+
+            MessageToast.show("Allocation calculated successfully.");
+        },
+
+
+        /* ==========================================
+           RESET TOTALS
+        ========================================== */
+        _resetTotals() {
+
+            const oViewModel = this.getView().getModel("view");
+
+            oViewModel.setProperty("/totalStock", 0);
+            oViewModel.setProperty("/totalAvailable", 0);
+            oViewModel.setProperty("/totalFundRequired", 0);
+            oViewModel.setProperty("/totalAllocationQty", 0);
+            oViewModel.setProperty("/totalOrderValue", 0);
+        },
+
+        _calculateInitialTotals() {
+
+            const oViewModel = this.getView().getModel("view");
+            const aModels = oViewModel.getProperty("/Model") || [];
+
+            let totalStock = 0;
+            let totalAvailable = 0;
+            let fundRequired = 0;
+
+            aModels.forEach(model => {
+
+                totalStock += parseFloat(model.depotStock) || 0;
+                totalAvailable += parseFloat(model.availableStock) || 0;
+                fundRequired += parseFloat(model.fundRequired) || 0;
+            });
+
+            oViewModel.setProperty("/totalStock", totalStock);
+            oViewModel.setProperty("/totalAvailable", totalAvailable);
+            oViewModel.setProperty("/totalFundRequired", fundRequired);
+            oViewModel.setProperty("/totalAllocationQty", 0);
+            oViewModel.setProperty("/totalOrderValue", 0);
+        },
+
+
+        /* ==========================================
+           MODEL DETAIL TOGGLE
+        ========================================== */
+        onModelSelect(oEvent) {
+
+            const oContext = oEvent.getSource().getBindingContext("view");
             if (!oContext) return;
 
             const oSelected = oContext.getObject();
@@ -227,12 +336,14 @@ sap.ui.define([
         },
 
 
-        onModelPrevious: function () {
-            const oWizard = this.byId("BillingWizard");
-            oWizard.previousStep();
+        onModelPrevious() {
+            this.byId("BillingWizard").previousStep();
         },
 
+
         onSaveAllocation() {
+            MessageToast.show("Save logic to be implemented.");
         }
+
     });
 });
