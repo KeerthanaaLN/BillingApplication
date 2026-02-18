@@ -40,14 +40,12 @@
                                     suggestionItemSelected="onDealerSelect"
                                     liveChange="onDealerLiveChange"
                                     suggestionRows="{ path: '/Dealer',parameters: {$select: 'dealerID,dealerName'}}">
-                                    <!-- Column headers -->
                                     <suggestionColumns>
                                         <Column width="250px">
                                             <Label text="Dealer ID" />
                                         </Column>
                                     </suggestionColumns>
 
-                                    <!-- Row template -->
                                     <suggestionRows>
                                         <ColumnListItem>
                                             <cells>
@@ -116,39 +114,89 @@
 
                 <WizardStep
                     id="ModelStep"
-                    title="Model Allocation"
+                    title="Model Allocation Info"
                     validated="false"
                 >
                     <VBox class="sapUiResponsiveMargin">
-                        <HBox class="sapUiSmallMarginBottom">
-                            <Title
-                                text="Model Allocation Details"
-                                level="H3"
-                            />
+
+                        <HBox class="sapUiSmallMarginBottom" justifyContent="End">
+
+                            <HBox class="sapUiTinyMarginStart">
+                                <Text text="Total Stock : " />
+                                <Text text="{view>/totalStock}" class="sapUiTinyMarginBegin sapUiSmallMarginEnd"/>
+                            </HBox>
+
+                            <HBox class="sapUiTinyMarginStart">
+                                <Text text="Total Available : " />
+                                <Text text="{view>/totalAvailable}" class="sapUiTinyMarginBegin sapUiSmallMarginEnd"/>
+                            </HBox>
+
+                            <HBox class="sapUiTinyMarginStart">
+                                <Text text="Fund Required : " />
+                                <Text text="{view>/totalFundRequired}" class="sapUiTinyMarginBegin sapUiSmallMarginEnd"/>
+                            </HBox>
+
+                            <HBox class="sapUiTinyMarginStart">
+                                <Text text="Allocation Qty : " />
+                                <Text text="{view>/totalAllocationQty}" class="sapUiTinyMarginBegin sapUiSmallMarginEnd"/>
+                            </HBox>
+
+                            <HBox class="sapUiTinyMarginStart">
+                                <Text text="Total Value : " />
+                                <Text text="{view>/totalOrderValue}" class="sapUiTinyMarginBegin"/>
+                            </HBox>
+
                         </HBox>
+
+                        <HBox justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
+
+                            <Text
+                                text="* Disclaimer: Please review all quantities carefully before saving."
+                                class="sapUiSmallMarginTop disclaimerText"
+                                wrapping="true"
+                            />
+
+                            <HBox>
+                                <Button
+                                    text="Calculate Allocation"
+                                    type="Emphasized"
+                                    press="onCalculateAllocation"
+                                    class="sapUiTinyMarginEnd"
+                                />
+                                <Button
+                                    text="Save Allocation"
+                                    type="Accept"
+                                    press="onSaveAllocation"
+                                />
+                            </HBox>
+
+                        </HBox>
+
+
 
                         <Table
                             id="allocationTable"
                             items="{/Model}"
-                            class="sapUiResponsiveMargin"
+                            class="sapUiResponsiveMargin sapUiTinyMarginEnd" 
+                            alternateRowColors="true"
                         >
                             <columns>
                                 <Column
-                                    width="15%"
+                                    width="12%"
                                     demandPopin="true"
                                     minScreenWidth="Tablet"
                                 >
                                     <Text text="Model Code" />
                                 </Column>
                                 <Column
-                                    width="25%"
+                                    width="32%"
                                     demandPopin="true"
                                     minScreenWidth="Tablet"
                                 >
                                     <Text text="Model Description" />
                                 </Column>
                                 <Column
-                                    width="12%"
+                                    width="10%"
                                     demandPopin="true"
                                     minScreenWidth="Tablet"
                                     hAlign="Right"
@@ -156,7 +204,7 @@
                                     <Text text="Depot Stock" />
                                 </Column>
                                 <Column
-                                    width="12%"
+                                    width="10%"
                                     demandPopin="true"
                                     minScreenWidth="Tablet"
                                     hAlign="Right"
@@ -164,7 +212,7 @@
                                     <Text text="Allocated Qty" />
                                 </Column>
                                 <Column
-                                    width="12%"
+                                    width="10%"
                                     demandPopin="true"
                                     minScreenWidth="Tablet"
                                     hAlign="Right"
@@ -180,7 +228,7 @@
                                     <Text text="Fund Required" />
                                 </Column>
                                 <Column
-                                    width="15%"
+                                    width="10%"
                                     demandPopin="true"
                                     minScreenWidth="Tablet"
                                     hAlign="Right"
@@ -256,12 +304,6 @@
                             type="Default"
                             press="onModelPrevious"
                             width="120px"
-                        />
-                        <Button
-                            text="Save Allocation"
-                            type="Accept"
-                            press="onSaveAllocation"
-                            width="150px"
                         />
                     </HBox>
                 </WizardStep>

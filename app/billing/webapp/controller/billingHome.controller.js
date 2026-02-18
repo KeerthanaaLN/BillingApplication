@@ -15,8 +15,17 @@ sap.ui.define([
                 limitAvailability: "",
                 infOtherAmount: "",
                 Model: [],
-                dealerSelected: false   // ⭐ important
+                dealerSelected: false,   // ⭐ important
+
+                totalStock: 0,
+                totalAvailable: 0,
+                // totalOrderQty: 0,
+                totalFundRequired: 0,
+                totalAllocationQty: 0,
+                totalOrderValue: 0
             });
+
+
 
             this.getView().setModel(oViewModel, "view");
         }
@@ -31,7 +40,6 @@ sap.ui.define([
 
             if (!oBinding) return;
 
-            // nothing typed → show nothing
             if (!sValue) {
                 oBinding.filter([]);
                 oBinding.refresh();
@@ -41,7 +49,6 @@ sap.ui.define([
             const Filter = sap.ui.model.Filter;
             const FilterOperator = sap.ui.model.FilterOperator;
 
-            // STRICT match (starts with or contains based on your choice)
             const oFilter = new Filter({
                 filters: [
                     new Filter("dealerID", FilterOperator.StartsWith, sValue),
@@ -51,7 +58,7 @@ sap.ui.define([
             });
 
             oBinding.filter([oFilter]);
-            oBinding.refresh(); // ⭐ force backend request
+            oBinding.refresh(); 
         },
         onDealerSelect(oEvent) {
 
@@ -62,11 +69,10 @@ sap.ui.define([
             const oDealer = oContext.getObject();
             const sDealerID = oDealer.dealerID;
 
-            const oModel = this.getView().getModel(); // OData V4 model
+            const oModel = this.getView().getModel(); 
             const oViewModel = this.getView().getModel("view");
             oViewModel.setProperty("/dealerSelected", true);
 
-            // Bind selected dealer context (READ full entity)
             const sPath = `/Dealer('${sDealerID}')`;
 
             oModel.bindContext(sPath).requestObject().then((oFullDealer) => {
@@ -97,7 +103,6 @@ sap.ui.define([
                 oViewModel.setProperty("/dealerSelected", false); // disable GO
             }
             else {
-                // user typing → not a confirmed selection
                 oViewModel.setProperty("/dealerSelected", false);
             }
         },
@@ -113,58 +118,94 @@ sap.ui.define([
             const fFund = parseFloat(oViewModel.getProperty("/fundAvailability")) || 0;
             const fLimit = parseFloat(oViewModel.getProperty("/limitAvailability")) || 0;
 
-            const MIN_FUND = 200000; // 2 Lakhs
+            const MIN_FUND = 200000; 
 
-            // Basic validation - Dealer selected or not
             if (!sDealerType) {
                 MessageBox.error("Please select a dealer before proceeding.");
                 return;
             }
 
-            // Condition 1: INF Dealer
-            if (sDealerType === "INF") {
-
-                if (fLimit !== 0) {
-                    MessageBox.error("INF dealer must have Limit Available = 0.");
-                    return;
-                }
-
-                if (fFund <= MIN_FUND) {
-                    MessageBox.error("INF dealer Fund Availability must be above 2 Lakhs.");
-                    return;
-                }
+            if (fFund <= MIN_FUND) {
+                MessageBox.error("Fund Availability must be above 2 Lakhs.");
+                return;
             }
 
-            // Condition 2: NON-INF Dealer
-            if (sDealerType === "NON-INF") {
-
-                if (fLimit === 0) {
-                    MessageBox.error("NON-INF dealer must have Limit Available greater than 0.");
-                    return;
-                }
-
-                if (fFund <= MIN_FUND) {
-                    MessageBox.error("NON-INF dealer Fund Availability must be above 2 Lakhs.");
-                    return;
-                }
+            if (sDealerType === "INF" && fLimit !== 0) {
+                MessageBox.error("INF dealer must have Limit Available = 0.");
+                return;
             }
 
-            // ✅ If all validations pass
+            if (sDealerType === "NON-INF" && fLimit === 0) {
+                MessageBox.error("NON-INF dealer must have Limit Available greater than 0.");
+                return;
+            }
+
             oDealerStep.setValidated(true);
             oWizard.nextStep();
+            setTimeout(() => {
+                this._calculateTotals();
+            }, 300);
+
 
         },
 
+        _calculateTotals() {
+
+            const oTable = this.byId("allocationTable");
+            const aItems = oTable.getItems();
+
+            let totalStock = 0;
+            let totalAvailable = 0;
+            // let totalOrderQty = 0;
+            let totalFundRequired = 0;
+            let totalAllocationQty = 0;
+            let totalOrderValue = 0;
+
+            aItems.forEach(item => {
+
+                const oData = item.getBindingContext().getObject();
+
+                totalStock += parseFloat(oData.depotStock) || 0;
+                totalAvailable += parseFloat(oData.availableStock) || 0;
+                // totalOrderQty += parseFloat(oData.orderQty) || 0;
+                totalFundRequired += parseFloat(oData.fundRequired) || 0;
+                totalAllocationQty += parseFloat(oData.allocationQty) || 0;
+                totalOrderValue += (parseFloat(oData.allocationQty) || 0) *
+                                (parseFloat(oData.perBikeValue) || 0);
+            });
+
+            const oViewModel = this.getView().getModel("view");
+
+            oViewModel.setProperty("/totalStock", totalStock);
+            oViewModel.setProperty("/totalAvailable", totalAvailable);
+            // oViewModel.setProperty("/totalOrderQty", totalOrderQty);
+            oViewModel.setProperty("/totalFundRequired", totalFundRequired);
+            oViewModel.setProperty("/totalAllocationQty", totalAllocationQty);
+            oViewModel.setProperty("/totalOrderValue", totalOrderValue);
+        },
+
+
         onAllocationChange(oEvent) {
-            // Your allocation change logic here
+
+            const oInput = oEvent.getSource();
+            const oContext = oInput.getBindingContext();
+            const oModel = oContext.getModel();
+            const sPath = oContext.getPath();
+
+            let iQty = parseInt(oInput.getValue(), 10) || 0;
+
+            oModel.setProperty(sPath + "/allocationQty", iQty);
+
+            const perBike = parseFloat(oModel.getProperty(sPath + "/perBikeValue")) || 0;
+            oModel.setProperty(sPath + "/orderValue", iQty * perBike);
+
+            this._calculateTotals();
         },
 
         onModelPrevious() {
-            // Your previous button logic here
         },
 
         onSaveAllocation() {
-            // Your save logic here
         }
     });
 });
