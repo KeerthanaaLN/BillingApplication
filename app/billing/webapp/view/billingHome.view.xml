@@ -10,7 +10,6 @@
                 id="BillingWizard"
                 showNextButton="false"
             >
-                <!-- ================= DEALER STEP ================= -->
 
                 <WizardStep
                     id="DealerStep"
@@ -23,7 +22,6 @@
                             alignItems="End"
                             justifyContent="SpaceBetween"
                         >
-                            <!-- Dealer Suggest -->
                             <VBox width="250px">
                                 <Label
                                     text="Select Dealer ID :"
@@ -62,7 +60,6 @@
                                 </Input>
                             </VBox>
 
-                            <!-- Dealer Info -->
                             <VBox width="15%">
                                 <Label
                                     text="Dealer Name :"
@@ -120,7 +117,6 @@
                     </VBox>
                 </WizardStep>
 
-                <!-- ================= MODEL STEP ================= -->
 
                 <WizardStep
                     id="ModelStep"
@@ -128,7 +124,6 @@
                     validated="false"
                 >
                     <VBox class="sapUiResponsiveMargin">
-                        <!-- ===== Totals Section ===== -->
 
                         <HBox
                             justifyContent="End"
@@ -175,8 +170,6 @@
                             </HBox>
                         </HBox>
 
-                        <!-- ===== Action Buttons ===== -->
-
                         <HBox
                             justifyContent="SpaceBetween"
                             class="sapUiSmallMarginBottom"
@@ -203,8 +196,6 @@
                                 />
                             </HBox>
                         </HBox>
-
-                        <!-- ===== MAIN MODEL TABLE ===== -->
 
                         <Table
                             id="allocationTable"
@@ -273,7 +264,6 @@
                             <items>
                                 <ColumnListItem>
                                     <cells>
-                                        <!-- Clickable Model Code -->
                                         <Link
                                             text="{view>modelCode}"
                                             press="onModelSelect"
@@ -316,8 +306,6 @@
                                 </ColumnListItem>
                             </items>
                         </Table>
-
-                        <!-- ===== MODEL DETAIL TABLE ===== -->
 
                         <Table
                             id="modelDetailTable"

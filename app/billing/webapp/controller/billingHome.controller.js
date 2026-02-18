@@ -87,10 +87,6 @@ sap.ui.define([
                 });
         },
 
-
-        /* ==========================================
-           DEALER LIVE CHANGE
-        ========================================== */
         onDealerLiveChange(oEvent) {
 
             const sValue = oEvent.getParameter("value");
@@ -111,70 +107,70 @@ sap.ui.define([
             }
         },
 
+        async onDealerGo() {
 
-        /* ==========================================
-           DEALER GO
-        ========================================== */
-        onDealerGo() {
+    const oViewModel = this.getView().getModel("view");
+    const oODataModel = this.getView().getModel();
+    const oWizard = this.byId("BillingWizard");
+    const oDealerStep = this.byId("DealerStep");
 
-            const oViewModel = this.getView().getModel("view");
-            const oWizard = this.byId("BillingWizard");
-            const oDealerStep = this.byId("DealerStep");
+    const sDealerID = oViewModel.getProperty("/selectedDealerID");
+    const sDealerType = oViewModel.getProperty("/infType");
+    const fFund = parseFloat(oViewModel.getProperty("/fundAvailability")) || 0;
+    const fLimit = parseFloat(oViewModel.getProperty("/limitAvailability")) || 0;
 
-            const sDealerID = oViewModel.getProperty("/selectedDealerID");
-            const sDealerType = oViewModel.getProperty("/infType");
-            const fFund = parseFloat(oViewModel.getProperty("/fundAvailability")) || 0;
-            const fLimit = parseFloat(oViewModel.getProperty("/limitAvailability")) || 0;
+    const MIN_FUND = 200000;
 
-            const MIN_FUND = 200000;
+    if (!sDealerID) {
+        MessageBox.error("Please select a dealer.");
+        return;
+    }
 
-            if (!sDealerID) {
-                MessageBox.error("Please select a dealer.");
-                return;
-            }
+    if (fFund <= MIN_FUND) {
+        MessageBox.error("Fund Availability must be above 2 Lakhs.");
+        return;
+    }
 
-            if (fFund <= MIN_FUND) {
-                MessageBox.error("Fund Availability must be above 2 Lakhs.");
-                return;
-            }
+    if (sDealerType === "INF" && fLimit !== 0) {
+        MessageBox.error("INF dealer must have Limit Available = 0.");
+        return;
+    }
 
-            if (sDealerType === "INF" && fLimit !== 0) {
-                MessageBox.error("INF dealer must have Limit Available = 0.");
-                return;
-            }
+    if (sDealerType === "NON-INF" && fLimit === 0) {
+        MessageBox.error("NON-INF dealer must have Limit Available greater than 0.");
+        return;
+    }
 
-            if (sDealerType === "NON-INF" && fLimit === 0) {
-                MessageBox.error("NON-INF dealer must have Limit Available greater than 0.");
-                return;
-            }
+    try {
 
-            /* Load ALL Models */
-            const oODataModel = this.getView().getModel();
-            const oListBinding = oODataModel.bindList("/Model");
+        const oListBinding = oODataModel.bindList("/Model");
+        const aContexts = await oListBinding.requestContexts();
 
-            oListBinding.requestContexts().then(aContexts => {
+        const aModels = aContexts.map(ctx => {
 
-                const aModels = aContexts.map(ctx => {
-                    const obj = ctx.getObject();
-                    obj.allocationQty = 0;
-                    obj.orderValue = 0;
-                    return obj;
-                });
+            const obj = ctx.getObject();
 
-                oViewModel.setProperty("/Model", aModels);
+            return {
+                ...obj,
+                _context: ctx,           
+                allocationQty: 0,
+                orderValue: 0
+            };
+        });
 
-                oDealerStep.setValidated(true);
-                oWizard.nextStep();
+        oViewModel.setProperty("/Model", aModels);
 
-                this._calculateInitialTotals();
+        oDealerStep.setValidated(true);
+        oWizard.nextStep();
 
-            });
-        },
+        this._calculateInitialTotals();
 
+    } catch (err) {
+        MessageBox.error("Error loading models.");
+    }
+}
+,
 
-        /* ==========================================
-           ALLOCATION CHANGE (NO LIVE CALCULATION)
-        ========================================== */
         onAllocationChange(oEvent) {
 
             const oInput = oEvent.getSource();
@@ -191,14 +187,11 @@ sap.ui.define([
                 oModel.getProperty(sPath + "/availableStock"), 10
             ) || 0;
 
-            /* ================= VALIDATION ================= */
 
-            // Negative not allowed
             if (iQty < 0) {
                 iQty = 0;
             }
 
-            // Greater than available stock
             if (iQty > availableStock) {
 
                 iQty = availableStock;
@@ -208,10 +201,8 @@ sap.ui.define([
                 );
             }
 
-            // Set corrected value
             oModel.setProperty(sPath + "/allocationQty", iQty);
 
-            /* Enable Calculate Button Logic */
             const aModels = oModel.getProperty("/Model") || [];
 
             const hasValue = aModels.some(model =>
@@ -221,10 +212,6 @@ sap.ui.define([
             oModel.setProperty("/calculateEnabled", hasValue);
         },
 
-
-        /* ==========================================
-           CALCULATE BUTTON
-        ========================================== */
         onCalculateAllocation() {
 
             const oViewModel = this.getView().getModel("view");
@@ -273,10 +260,6 @@ sap.ui.define([
             MessageToast.show("Allocation calculated successfully.");
         },
 
-
-        /* ==========================================
-           RESET TOTALS
-        ========================================== */
         _resetTotals() {
 
             const oViewModel = this.getView().getModel("view");
@@ -311,10 +294,6 @@ sap.ui.define([
             oViewModel.setProperty("/totalOrderValue", 0);
         },
 
-
-        /* ==========================================
-           MODEL DETAIL TOGGLE
-        ========================================== */
         onModelSelect(oEvent) {
 
             const oContext = oEvent.getSource().getBindingContext("view");
@@ -341,9 +320,74 @@ sap.ui.define([
         },
 
 
-        onSaveAllocation() {
-            MessageToast.show("Save logic to be implemented.");
-        }
+        async onSaveAllocation() {
 
+            const oViewModel = this.getView().getModel("view");
+            const oODataModel = this.getView().getModel();
+
+            const aModels = oViewModel.getProperty("/Model") || [];
+            const sDealerID = oViewModel.getProperty("/selectedDealerID");
+
+            let dealerFund = parseFloat(oViewModel.getProperty("/fundAvailability")) || 0;
+
+            if (!aModels.length) {
+                MessageBox.error("No models available.");
+                return;
+            }
+
+            let totalOrderValue = 0;
+
+            try {
+
+                for (let model of aModels) {
+
+                    const qty = parseInt(model.allocationQty, 10) || 0;
+                    if (qty <= 0) continue;
+
+                    const price = parseFloat(model.perBikeValue) || 0;
+                    const orderValue = qty * price;
+
+                    totalOrderValue += orderValue;
+
+                    model.allocatedQty = (parseInt(model.allocatedQty, 10) || 0) + qty;
+                    model.depotStock = (parseInt(model.depotStock, 10) || 0) - qty;
+                    model.availableStock = (parseInt(model.availableStock, 10) || 0) - qty;
+                    model.fundRequired = model.availableStock * price;
+
+                    model.allocationQty = 0;
+                    model.orderValue = 0;
+
+                    model._context.setProperty("allocatedQty", model.allocatedQty);
+                    model._context.setProperty("depotStock", model.depotStock);
+                    model._context.setProperty("availableStock", model.availableStock);
+                    model._context.setProperty("fundRequired", model.fundRequired);
+                }
+
+                dealerFund = dealerFund - totalOrderValue;
+
+                const oDealerBinding = oODataModel.bindContext(`/Dealer('${sDealerID}')`);
+                await oDealerBinding.requestObject();
+
+                const oDealerContext = oDealerBinding.getBoundContext();
+
+                oDealerContext.setProperty("fundAvailability", dealerFund);
+
+                await oODataModel.submitBatch("$auto");
+
+                oViewModel.setProperty("/Model", aModels);
+                oViewModel.setProperty("/fundAvailability", dealerFund);
+
+                this._calculateInitialTotals();
+
+                oViewModel.setProperty("/calculateEnabled", false);
+
+                MessageToast.show("Allocation saved successfully.");
+
+            } catch (error) {
+
+                console.error(error);
+                MessageBox.error("Error while saving allocation.");
+            }
+        }
     });
 });
