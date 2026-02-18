@@ -176,9 +176,12 @@
 
                         <Table
                             id="allocationTable"
-                            items="{/Model}"
-                            class="sapUiResponsiveMargin sapUiTinyMarginEnd" 
-                            alternateRowColors="true"
+                            items="{
+                                path: '/Model',
+                                parameters: {
+                                    $select: 'modelCode,modelDesc,depotStock,allocatedQty,availableStock,fundRequired,allocationQty,perBikeValue,orderValue,fst,red,yellow,black,green,rationalAllocation,snopAllocation,totalAllocation'
+                                }
+                            }"
                         >
                             <columns>
                                 <Column
@@ -256,7 +259,10 @@
                             <items>
                                 <ColumnListItem>
                                     <cells>
-                                        <Text text="{modelCode}" />
+                                        <Link
+                                            text="{modelCode}"
+                                            press="onModelSelect"
+                                        />
                                         <Text text="{modelDesc}" />
                                         <Text
                                             text="{depotStock}"
@@ -293,6 +299,42 @@
                                 </ColumnListItem>
                             </items>
                         </Table>
+
+                        <Table
+                            id="modelDetailTable"
+                            items="{view>/modelDetails}"
+                            visible="{view>/showModelDetails}"
+                            class="sapUiResponsiveMargin"
+                        >
+
+                            <columns>
+                                <Column><Text text="FST"/></Column>
+                                <Column><Text text="Red"/></Column>
+                                <Column><Text text="Yellow"/></Column>
+                                <Column><Text text="Black"/></Column>
+                                <Column><Text text="Green"/></Column>
+                                <Column><Text text="Rational Allocation"/></Column>
+                                <Column><Text text="SNOP Allocation"/></Column>
+                                <Column><Text text="Total Allocation"/></Column>
+                            </columns>
+
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <Text text="{view>fst}" />
+                                        <Text text="{view>red}" />
+                                        <Text text="{view>yellow}" />
+                                        <Text text="{view>black}" />
+                                        <Text text="{view>green}" />
+                                        <Text text="{view>rationalAllocation}" />
+                                        <Text text="{view>snopAllocation}" />
+                                        <Text text="{view>totalAllocation}" />
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+
+                        </Table>
+
                     </VBox>
 
                     <HBox
