@@ -220,7 +220,7 @@ sap.ui.define([
 
             let totalOrderValue = 0;
 
-            // 🔹 First calculate total WITHOUT modifying model
+      
             aModels.forEach(model => {
 
                 const qty = parseInt(model.allocationQty, 10) || 0;
@@ -229,7 +229,7 @@ sap.ui.define([
                 totalOrderValue += qty * price;
             });
 
-            // 🔥 Validate fund BEFORE updating anything
+        
             if (totalOrderValue > dealerFund) {
 
                 MessageBox.error(
@@ -237,10 +237,9 @@ sap.ui.define([
                     ") exceeds Dealer Fund (" + dealerFund.toLocaleString() + ")."
                 );
 
-                return; // ❌ Exit before modifying model
+                return; 
             }
 
-            // ✅ Now safe to update model
             let totalStock = 0;
             let totalAvailable = 0;
             let totalFundRequired = 0;
@@ -340,7 +339,7 @@ sap.ui.define([
             let dealerFund = parseFloat(oViewModel.getProperty("/fundAvailability")) || 0;
 
             if (!aModels.length) {
-                MessageBox.error("No models available.");
+                sap.m.MessageBox.error("No models available.");
                 return;
             }
 
@@ -358,6 +357,33 @@ sap.ui.define([
 
                     totalOrderValue += orderValue;
 
+                    const oBinding = oODataModel.bindList("/DealerAllocations", null, null, null, {
+                        $filter: `dealer_dealerID eq '${sDealerID}' and model_modelCode eq '${model.modelCode}'`
+                    });
+
+                    const aExisting = await oBinding.requestContexts();
+
+                    if (aExisting.length > 0) {
+
+                        const oContext = aExisting[0];
+
+                        const existingQty = parseInt(oContext.getProperty("allocationQty"), 10) || 0;
+                        const existingValue = parseFloat(oContext.getProperty("orderValue")) || 0;
+
+                        oContext.setProperty("allocationQty", existingQty + qty);
+                        oContext.setProperty("orderValue", existingValue + orderValue);
+
+                    } else {
+
+                        oODataModel.bindList("/DealerAllocations").create({
+                            dealer_dealerID: sDealerID,
+                            model_modelCode: model.modelCode,
+                            allocationQty: qty,
+                            orderValue: orderValue
+                        });
+                    }
+
+            
                     model.allocatedQty = (parseInt(model.allocatedQty, 10) || 0) + qty;
                     model.depotStock = (parseInt(model.depotStock, 10) || 0) - qty;
                     model.availableStock = (parseInt(model.availableStock, 10) || 0) - qty;
@@ -372,31 +398,31 @@ sap.ui.define([
                     model._context.setProperty("fundRequired", model.fundRequired);
                 }
 
-                dealerFund = dealerFund - totalOrderValue;
+              dealerFund = dealerFund - totalOrderValue;
 
                 const oDealerBinding = oODataModel.bindContext(`/Dealer('${sDealerID}')`);
                 await oDealerBinding.requestObject();
 
                 const oDealerContext = oDealerBinding.getBoundContext();
-
                 oDealerContext.setProperty("fundAvailability", dealerFund);
 
+           
                 await oODataModel.submitBatch("$auto");
 
-                oViewModel.setProperty("/Model", aModels);
                 oViewModel.setProperty("/fundAvailability", dealerFund);
 
                 this._calculateInitialTotals();
-
                 oViewModel.setProperty("/calculateEnabled", false);
 
-                MessageToast.show("Allocation saved successfully.");
+                sap.m.MessageToast.show("Allocation saved successfully.");
 
             } catch (error) {
 
                 console.error(error);
-                MessageBox.error("Error while saving allocation.");
+                sap.m.MessageBox.error("Error while saving allocation.");
             }
         }
+
+
     });
 });

@@ -1,6 +1,5 @@
 namespace billingApp.db;
 
-// DEALER
 entity Dealers {
     key dealerID          : String;
         dealerName        : String;
@@ -8,11 +7,11 @@ entity Dealers {
         limitAvailability : Decimal;
         infOtherAmount    : Decimal;
         infType           : String;
-        allocations       : Association to many Models
-                                on allocations.dealers = $self;
+
+        allocations       : Association to many DealerAllocations
+                                on allocations.dealer = $self;
 }
 
-// MODEL
 entity Models {
     key modelCode          : String;
         modelDesc          : String;
@@ -33,5 +32,18 @@ entity Models {
         snopAllocation     : Integer;
         svpoAllocation     : Integer;
         totalAllocation    : Integer;
-        dealers            : Association to Dealers;
+
+        allocations        : Association to many DealerAllocations
+                                on allocations.model = $self;
+}
+
+
+entity DealerAllocations {
+    key ID          : UUID;
+
+        dealer      : Association to Dealers;
+        model       : Association to Models;
+
+        allocationQty : Integer;
+        orderValue    : Decimal;
 }
