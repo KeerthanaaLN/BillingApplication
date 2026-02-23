@@ -10,6 +10,7 @@
                 id="BillingWizard"
                 showNextButton="false"
             >
+
                 <WizardStep
                     id="DealerStep"
                     title="Dealer Information"
@@ -116,19 +117,19 @@
                     </VBox>
                 </WizardStep>
 
+
                 <WizardStep
                     id="ModelStep"
                     title="Model Allocation Info"
                     validated="false"
                 >
                     <VBox class="sapUiResponsiveMargin">
+
                         <HBox
                             justifyContent="End"
                             class="sapUiSmallMarginBottom"
                         >
-                            <HBox
-                                class="sapUiTinyMarginStart sapUiTinyMarginEnd"
-                            >
+                            <HBox class="sapUiTinyMarginStart sapUiTinyMarginEnd">
                                 <Text text="Total Stock : " />
                                 <Text
                                     text="{view>/totalStock}"
@@ -136,9 +137,7 @@
                                 />
                             </HBox>
 
-                            <HBox
-                                class="sapUiTinyMarginStart sapUiTinyMarginEnd"
-                            >
+                            <HBox class="sapUiTinyMarginStart sapUiTinyMarginEnd">
                                 <Text text="Total Available : " />
                                 <Text
                                     text="{view>/totalAvailable}"
@@ -146,9 +145,7 @@
                                 />
                             </HBox>
 
-                            <HBox
-                                class="sapUiTinyMarginStart sapUiTinyMarginEnd"
-                            >
+                            <HBox class="sapUiTinyMarginStart sapUiTinyMarginEnd">
                                 <Text text="Fund Required : " />
                                 <Text
                                     text="{view>/totalFundRequired}"
@@ -156,9 +153,7 @@
                                 />
                             </HBox>
 
-                            <HBox
-                                class="sapUiTinyMarginStart sapUiTinyMarginEnd"
-                            >
+                            <HBox class="sapUiTinyMarginStart sapUiTinyMarginEnd">
                                 <Text text="Allocation Qty : " />
                                 <Text
                                     text="{view>/totalAllocationQty}"
@@ -166,9 +161,7 @@
                                 />
                             </HBox>
 
-                            <HBox
-                                class="sapUiTinyMarginStart sapUiTinyMarginEnd"
-                            >
+                            <HBox class="sapUiTinyMarginStart sapUiTinyMarginEnd">
                                 <Text text="Total Value : " />
                                 <Text
                                     text="{view>/totalOrderValue}"
@@ -200,7 +193,6 @@
                                     text="Save Allocation"
                                     type="Accept"
                                     press="onSaveAllocation"
-                                    enabled="{view>/saveEnabled}"
                                 />
                             </HBox>
                         </HBox>
@@ -323,34 +315,19 @@
                         >
                             <columns>
                                 <Column>
-                                    <Text
-                                        text="FST"
-                                        class="fstHeader"
-                                    />
+                                    <Text text="FST" class="fstHeader"/>
                                 </Column>
                                 <Column>
-                                    <Text
-                                        text="Red"
-                                        class="redHeader"
-                                    />
+                                    <Text text="Red" class="redHeader"/>
                                 </Column>
                                 <Column>
-                                    <Text
-                                        text="Yellow"
-                                        class="yellowHeader"
-                                    />
+                                    <Text text="Yellow" class="yellowHeader"/>
                                 </Column>
                                 <Column>
-                                    <Text
-                                        text="Black"
-                                        class="blackHeader"
-                                    />
+                                    <Text text="Black" class="blackHeader"/>
                                 </Column>
                                 <Column>
-                                    <Text
-                                        text="Green"
-                                        class="greenHeader"
-                                    />
+                                    <Text text="Green" class="greenHeader"/>
                                 </Column>
                                 <Column>
                                     <Text text="Rational Allocation" />

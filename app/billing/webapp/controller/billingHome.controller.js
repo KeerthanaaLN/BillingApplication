@@ -31,8 +31,7 @@ sap.ui.define([
 
                 modelDetails: [],
                 showModelDetails: false,
-                calculateEnabled: false,
-                saveEnabled: false
+                calculateEnabled: false
 
             });
 
@@ -211,8 +210,6 @@ sap.ui.define([
             );
 
             oModel.setProperty("/calculateEnabled", hasValue);
-            oModel.setProperty("/saveEnabled", false);
-
         },
 
         onCalculateAllocation() {
@@ -223,7 +220,7 @@ sap.ui.define([
 
             let totalOrderValue = 0;
 
-
+      
             aModels.forEach(model => {
 
                 const qty = parseInt(model.allocationQty, 10) || 0;
@@ -232,7 +229,7 @@ sap.ui.define([
                 totalOrderValue += qty * price;
             });
 
-
+        
             if (totalOrderValue > dealerFund) {
 
                 MessageBox.error(
@@ -240,7 +237,7 @@ sap.ui.define([
                     ") exceeds Dealer Fund (" + dealerFund.toLocaleString() + ")."
                 );
 
-                return;
+                return; 
             }
 
             let totalStock = 0;
@@ -269,8 +266,6 @@ sap.ui.define([
             oViewModel.setProperty("/totalOrderValue", totalOrderValue);
 
             MessageToast.show("Allocation calculated successfully.");
-            oViewModel.setProperty("/saveEnabled", true);
-
         },
 
         _resetTotals() {
@@ -388,35 +383,22 @@ sap.ui.define([
                         });
                     }
 
-                    const currentDepot = parseInt(model._context.getProperty("depotStock"), 10) || 0;
-                    const currentAvailable = parseInt(model._context.getProperty("availableStock"), 10) || 0;
-                    const currentAllocated = parseInt(model._context.getProperty("allocatedQty"), 10) || 0;
-
-                    const newDepot = currentDepot - qty;
-                    const newAvailable = currentAvailable - qty;
-                    const newAllocated = currentAllocated + qty;
-
-                    if (newDepot < 0 || newAvailable < 0) {
-                        sap.m.MessageBox.error("Insufficient stock in depot.");
-                        return;
-                    }
-
-
-                    model._context.setProperty("allocatedQty", newAllocated);
-                    model._context.setProperty("depotStock", newDepot);
-                    model._context.setProperty("availableStock", newAvailable);
-                    model._context.setProperty("fundRequired", newAvailable * price);
+            
+                    model.allocatedQty = (parseInt(model.allocatedQty, 10) || 0) + qty;
+                    model.depotStock = (parseInt(model.depotStock, 10) || 0) - qty;
+                    model.availableStock = (parseInt(model.availableStock, 10) || 0) - qty;
+                    model.fundRequired = model.availableStock * price;
 
                     model.allocationQty = 0;
                     model.orderValue = 0;
-                    model.allocatedQty = newAllocated;
-                    model.depotStock = newDepot;
-                    model.availableStock = newAvailable;
-                    model.fundRequired = newAvailable * price;
 
+                    model._context.setProperty("allocatedQty", model.allocatedQty);
+                    model._context.setProperty("depotStock", model.depotStock);
+                    model._context.setProperty("availableStock", model.availableStock);
+                    model._context.setProperty("fundRequired", model.fundRequired);
                 }
 
-                dealerFund = dealerFund - totalOrderValue;
+              dealerFund = dealerFund - totalOrderValue;
 
                 const oDealerBinding = oODataModel.bindContext(`/Dealer('${sDealerID}')`);
                 await oDealerBinding.requestObject();
@@ -424,15 +406,13 @@ sap.ui.define([
                 const oDealerContext = oDealerBinding.getBoundContext();
                 oDealerContext.setProperty("fundAvailability", dealerFund);
 
-
+           
                 await oODataModel.submitBatch("$auto");
 
                 oViewModel.setProperty("/fundAvailability", dealerFund);
 
                 this._calculateInitialTotals();
                 oViewModel.setProperty("/calculateEnabled", false);
-                oViewModel.setProperty("/saveEnabled", false);
-
 
                 sap.m.MessageToast.show("Allocation saved successfully.");
 
