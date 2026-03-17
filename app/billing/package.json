@@ -10,8 +10,9 @@
   "main": "webapp/index.html",
   "dependencies": {},
   "devDependencies": {
-    "@ui5/cli": "^4.0.33",
-    "@sap/ux-ui5-tooling": "1"
+    "@sap/cds-dk": "^9",
+    "@sap/ux-ui5-tooling": "1",
+    "@ui5/cli": "^4.0.33"
   },
   "scripts": {
     "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf"

@@ -4,7 +4,7 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
 >
-    <Page title="Billing Allocation" >
+    <Page title="Billing Allocation">
         <content>
             <VBox class="sapUiResponsiveMargin">
                 <Wizard
@@ -28,37 +28,24 @@
                                         text="Select Dealer ID :"
                                         class="sapUiSmallMarginBottom"
                                     />
-                                    <Input
-                                        id="dealerInput"
+                                    <ComboBox
+                                        id="dealerCombo"
                                         width="100%"
-                                        placeholder="Enter Dealer ID"
-                                        showSuggestion="true"
-                                        filterSuggests="false"
-                                        startSuggestion="1"
-                                        suggest="onDealerSuggest"
-                                        suggestionItemSelected="onDealerSelect"
-                                        liveChange="onDealerLiveChange"
-                                        suggestionRows="{
-                                        path: '/Dealer',
-                                        parameters: {$select: 'dealerID,dealerName'}
-                                    }"
+                                        placeholder="Select Dealer"
+                                        showSecondaryValues="true"
+                                        filterSecondaryValues="true"
+                                        items="{
+        path: '/Dealer',
+        parameters: {$select: 'dealerID,dealerName'}
+    }"
+                                        change="onDealerChange"
                                     >
-                                        <suggestionColumns>
-                                            <Column>
-                                                <Label text="Dealer ID" />
-                                            </Column>
-                                        </suggestionColumns>
-
-                                        <suggestionRows>
-                                            <ColumnListItem>
-                                                <cells>
-                                                    <Text
-                                                        text="{dealerID} - {dealerName}"
-                                                    />
-                                                </cells>
-                                            </ColumnListItem>
-                                        </suggestionRows>
-                                    </Input>
+                                        <core:ListItem
+                                            key="{dealerID}"
+                                            text="{dealerID} - {dealerName}"
+                                            additionalText="{dealerName}"
+                                        />
+                                    </ComboBox>
                                 </VBox>
 
                                 <VBox width="15%">
@@ -131,7 +118,10 @@
                                 <HBox
                                     class="sapUiTinyMarginStart sapUiTinyMarginEnd"
                                 >
-                                    <Text text="Total Stock : " class="modelHead"/>
+                                    <Text
+                                        text="Total Stock : "
+                                        class="modelHead"
+                                    />
                                     <Text
                                         text="{view>/totalStock}"
                                         class="sapUiTinyMarginBegin totalStock"
@@ -141,7 +131,10 @@
                                 <HBox
                                     class="sapUiTinyMarginStart sapUiTinyMarginEnd"
                                 >
-                                    <Text text="Total Available : " class="modelHead"/>
+                                    <Text
+                                        text="Total Available : "
+                                        class="modelHead"
+                                    />
                                     <Text
                                         text="{view>/totalAvailable}"
                                         class="sapUiTinyMarginBegin TotalAvailable"
@@ -151,7 +144,10 @@
                                 <HBox
                                     class="sapUiTinyMarginStart sapUiTinyMarginEnd"
                                 >
-                                    <Text text="Fund Required : " class="modelHead"/>
+                                    <Text
+                                        text="Fund Required : "
+                                        class="modelHead"
+                                    />
                                     <Text
                                         text="{view>/totalFundRequired}"
                                         class="sapUiTinyMarginBegin TotalFundRequired"
@@ -161,7 +157,10 @@
                                 <HBox
                                     class="sapUiTinyMarginStart sapUiTinyMarginEnd"
                                 >
-                                    <Text text="Allocation Qty : " class="modelHead"/>
+                                    <Text
+                                        text="Allocation Qty : "
+                                        class="modelHead"
+                                    />
                                     <Text
                                         text="{view>/totalAllocationQty}"
                                         class="sapUiTinyMarginBegin TotalAllocationQty"
@@ -171,7 +170,10 @@
                                 <HBox
                                     class="sapUiTinyMarginStart sapUiTinyMarginEnd"
                                 >
-                                    <Text text="Total Value : " class="modelHead"/>
+                                    <Text
+                                        text="Total Value : "
+                                        class="modelHead"
+                                    />
                                     <Text
                                         text="{view>/totalOrderValue}"
                                         class="sapUiTinyMarginBegin TotalOrderValue"
@@ -202,6 +204,7 @@
                                         text="Save Allocation"
                                         type="Accept"
                                         press="onSaveAllocation"
+                                        enabled="{view>/saveEnabled}"
                                     />
                                 </HBox>
                             </HBox>
@@ -283,9 +286,11 @@
                                                 text="{view>depotStock}"
                                                 textAlign="Right"
                                             />
-                                            <Text
+                                            <Link
                                                 text="{view>allocatedQty}"
-                                                textAlign="Right"
+                                                press="onAllocatedQtyPress"
+                                                enabled="{= ${view>allocatedQty} > 0 }"
+                                                class="sapUiTinyMarginEnd"
                                             />
                                             <Text
                                                 text="{view>availableStock}"
@@ -333,29 +338,44 @@
                     alternateRowColors="true"
                 >
                     <columns>
-                        <Column >
-                            <Text text="FST" class="fstHeader"/>
+                        <Column>
+                            <Text
+                                text="FST"
+                                class="fstHeader"
+                            />
                         </Column>
                         <Column>
-                            <Text text="Red" class="redHeader"/>
+                            <Text
+                                text="Red"
+                                class="redHeader"
+                            />
                         </Column>
                         <Column>
-                            <Text text="Yellow" class="yellowHeader"/>
+                            <Text
+                                text="Yellow"
+                                class="yellowHeader"
+                            />
                         </Column>
                         <Column>
-                            <Text text="Black" class="blackHeader"/>
+                            <Text
+                                text="Black"
+                                class="blackHeader"
+                            />
                         </Column>
                         <Column>
-                            <Text text="Green" class="greenHeader"/>
+                            <Text
+                                text="Green"
+                                class="greenHeader"
+                            />
                         </Column>
                         <Column>
-                            <Text text="Rational Allocation"/>
+                            <Text text="Rational Allocation" />
                         </Column>
                         <Column>
                             <Text text="SNOP Allocation" />
                         </Column>
                         <Column>
-                            <Text text="Total Allocation"/>
+                            <Text text="Total Allocation" />
                         </Column>
                     </columns>
 

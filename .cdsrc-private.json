@@ -5,7 +5,7 @@
         "binding": {
           "type": "cf",
           "apiEndpoint": "https://api.cf.us10-001.hana.ondemand.com",
-          "org": "cc6ac75btrial",
+          "org": "eaf74b9dtrial",
           "space": "dev",
           "instance": "BillingApp-db",
           "key": "BillingApp-db-key"

@@ -57,3 +57,15 @@
 .modelHead{
     font-weight: bold;
 }
+
+.PageHeader .sapMTitle {
+    margin-top: 5px !important;
+    margin-left: 5px !important;
+    font-size: 1rem !important;
+    font-weight: 700;
+}
+
+.PageHeader .sapMBar {
+    height: 3rem !important;
+}
+
